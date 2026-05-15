@@ -139,6 +139,24 @@ type Profile = {
   services: string[];
 };
 
+type PiAuthStatus = 'idle' | 'loading' | 'authenticated' | 'error' | 'outside_pi_browser';
+
+type PiAuthState = {
+  status: PiAuthStatus;
+  user: any | null;
+  error: string;
+};
+
+declare global {
+  interface Window {
+    Pi?: any;
+  }
+}
+
+const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
+const PI_SANDBOX = true;
+const PI_AUTH_SCOPES = ['username', 'payments'];
+
 const SUPABASE_URL = 'https://rmaczonfwjmxiggpnueb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TadYbajo6iPKMfpsNkWN0g_m35JaScB';
 const STORAGE_KEY = 'wanted-varan21-documents-market';
@@ -473,6 +491,85 @@ function buildSafeSnapshot(state: any) {
   };
 }
 
+function isLikelyPiBrowser() {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  return /PiBrowser|Pi Network|Pi\//i.test(ua) || Boolean(window.Pi);
+}
+
+function loadPiSdk(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (typeof window === 'undefined') {
+      reject(new Error('Window yok'));
+      return;
+    }
+
+    if (window.Pi) {
+      resolve(window.Pi);
+      return;
+    }
+
+    const existing = document.querySelector<HTMLScriptElement>('script[data-pi-sdk="true"]');
+    if (existing) {
+      const startedAt = Date.now();
+      const timer = window.setInterval(() => {
+        if (window.Pi) {
+          window.clearInterval(timer);
+          resolve(window.Pi);
+        } else if (Date.now() - startedAt > 12000) {
+          window.clearInterval(timer);
+          reject(new Error('Pi SDK yüklenemedi'));
+        }
+      }, 250);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = PI_SDK_URL;
+    script.async = true;
+    script.defer = true;
+    script.setAttribute('data-pi-sdk', 'true');
+
+    const timeout = window.setTimeout(() => {
+      reject(new Error('Pi SDK zaman aşımına uğradı'));
+    }, 15000);
+
+    script.onload = () => {
+      window.clearTimeout(timeout);
+      if (window.Pi) resolve(window.Pi);
+      else reject(new Error('Pi SDK yüklendi ama window.Pi bulunamadı'));
+    };
+
+    script.onerror = () => {
+      window.clearTimeout(timeout);
+      reject(new Error('Pi SDK script yüklenemedi'));
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
+async function authenticateWithPi() {
+  const Pi = await loadPiSdk();
+  if (!Pi) throw new Error('Pi SDK bulunamadı');
+
+  try {
+    Pi.init({ version: '2.0', sandbox: PI_SANDBOX });
+  } catch (firstError) {
+    try {
+      Pi.init({ version: '2.0' });
+    } catch (secondError) {
+      console.log('Pi init uyarısı:', firstError, secondError);
+    }
+  }
+
+  const onIncompletePaymentFound = (payment: any) => {
+    console.log('Incomplete Pi payment found:', payment);
+  };
+
+  return await Pi.authenticate(PI_AUTH_SCOPES, onIncompletePaymentFound);
+}
+
 async function supabaseUploadDocument(file: File, userKey: string) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
   const path = `${userKey}/${Date.now()}-${safeName}`;
@@ -519,11 +616,60 @@ export default function AppPage() {
   const [adminPassOpen, setAdminPassOpen] = useState(false);
   const [adminPass, setAdminPass] = useState('');
   const [toast, setToast] = useState('');
+  const [piAuth, setPiAuth] = useState<PiAuthState>({ status: 'idle', user: null, error: '' });
 
   const buyerReady = Boolean(profile.fullName && profile.phone && profile.location);
   const providerReady = Boolean(profile.fullName && profile.phone && profile.company && profile.profession);
   const providerVerified = documents.some((d) => d.userKey === 'provider-demo' && d.status === 'approved');
   const providerRating = useMemo(() => getReviewStats(reviews, 'provider-demo'), [reviews]);
+
+  useEffect(() => {
+    let active = true;
+
+    async function runPiAuth() {
+      if (typeof window === 'undefined') return;
+
+      const saved = localStorage.getItem('wanted-pi-auth-user');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (active) setPiAuth({ status: 'authenticated', user: parsed, error: '' });
+          return;
+        } catch {}
+      }
+
+      if (!isLikelyPiBrowser()) {
+        if (active) {
+          setPiAuth({
+            status: 'outside_pi_browser',
+            user: null,
+            error: 'Pi kimlik doğrulaması için uygulamayı Pi Browser içinde aç.',
+          });
+        }
+        return;
+      }
+
+      try {
+        if (active) setPiAuth({ status: 'loading', user: null, error: '' });
+        const authResult = await authenticateWithPi();
+        const user = authResult?.user || authResult || null;
+        if (user) localStorage.setItem('wanted-pi-auth-user', JSON.stringify(user));
+        if (active) setPiAuth({ status: 'authenticated', user, error: '' });
+      } catch (error: any) {
+        console.log('Pi auth error:', error);
+        if (active) {
+          setPiAuth({
+            status: 'error',
+            user: null,
+            error: error?.message || 'Pi kimlik doğrulaması başarısız oldu',
+          });
+        }
+      }
+    }
+
+    runPiAuth();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     try {
@@ -951,6 +1097,7 @@ export default function AppPage() {
     return (
       <div className="min-h-screen bg-[#F8FAFC] text-[#141414] p-6">
         <PiDomainValidationHidden />
+        <PiAuthStatusBadge piAuth={piAuth} />
         <div className="max-w-md mx-auto pt-6">
           <PremiumSplashHero t={t} />
 
@@ -1062,6 +1209,21 @@ export default function AppPage() {
   );
 }
 
+
+function PiAuthStatusBadge({ piAuth }: { piAuth: PiAuthState }) {
+  if (!piAuth || piAuth.status === 'idle' || piAuth.status === 'authenticated') return null;
+
+  const isError = piAuth.status === 'error';
+  const isOutside = piAuth.status === 'outside_pi_browser';
+
+  return (
+    <div className={`mb-3 rounded-2xl border px-4 py-3 text-sm font-bold ${isError ? 'bg-[#FFF4EA] border-[#FFD0A3] text-[#B45309]' : isOutside ? 'bg-[#F8FAFC] border-[#EAECF0] text-[#667085]' : 'bg-[#EAF8F0] border-[#BBF7D0] text-[#15803D]'}`}>
+      {piAuth.status === 'loading' && 'Pi kimlik doğrulaması hazırlanıyor...'}
+      {isOutside && 'Pi kimlik doğrulaması için uygulamayı Pi Browser içinde aç.'}
+      {isError && `Pi giriş uyarısı: ${piAuth.error}`}
+    </div>
+  );
+}
 
 function PiDomainValidationHidden() {
   return (
