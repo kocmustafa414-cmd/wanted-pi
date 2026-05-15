@@ -1,0 +1,5 @@
+export async function GET() {
+  return new Response("5d6aae9c8501a69ffca438a3612d8ee8b1fb3947ebfe2f5f301a376a13f1331c8434bb7755fe10a8564f0e71dcbc93972afd0fa6717d8050e0e8f8143436a87c", {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
+  });
+}
