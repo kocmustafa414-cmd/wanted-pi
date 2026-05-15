@@ -1124,7 +1124,7 @@ function PremiumWantedHero({ role }: any) {
         </p>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes spinSlow {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
@@ -1689,7 +1689,7 @@ function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
         <div className="whitespace-nowrap py-2 text-sm font-black text-[#15803D] animate-[buyerTicker_3s_ease-out_forwards]">
           ✦ Güvenli hizmet bul ✦ Teklifleri karşılaştır ✦ Doğrulanmış uzmanlar ✦ Wanted güvencesi ✦ Şeffaf talep sistemi ✦ Güvenli hizmet bul ✦ Teklifleri karşılaştır ✦ Doğrulanmış uzmanlar ✦
         </div>
-        <style jsx>{`
+        <style>{`
           @keyframes buyerTicker {
             0% { transform: translateX(-55%); }
             100% { transform: translateX(0); }
@@ -1721,7 +1721,7 @@ function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
 
       <p className="text-center text-[#667085] text-sm pb-4">{t.version}</p>
 
-      <style jsx>{`
+      <style>{`
         @keyframes buyerSlide {
           from { opacity: 0; transform: translateX(-18px); }
           to { opacity: 1; transform: translateX(0); }
@@ -1765,7 +1765,7 @@ function ProviderSettingsPage({ t, profile, setPage, setRole }: any) {
         <div className="whitespace-nowrap py-3 text-sm font-black text-[#00FFAA] animate-[providerTicker_3s_ease-out_forwards]">
           ✦ İş fırsatlarını yakala ✦ Belgeli uzman olarak öne çık ✦ 0.314 Pi teklif sistemi ✦ Güvenli müşteri eşleşmesi ✦
         </div>
-        <style jsx>{`
+        <style>{`
           @keyframes providerTicker {
             0% { transform: translateX(-55%); }
             100% { transform: translateX(0); }
@@ -1799,7 +1799,7 @@ function ProviderSettingsPage({ t, profile, setPage, setRole }: any) {
 
       <p className="text-center text-[#667085] text-sm pb-4">{t.version}</p>
 
-      <style jsx>{`
+      <style>{`
         @keyframes providerSlide {
           from { opacity: 0; transform: translateX(-18px); }
           to { opacity: 1; transform: translateX(0); }
@@ -2135,7 +2135,7 @@ function PremiumSplashHero({ t }: any) {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes wRotate {
           0% { transform: rotateY(0deg) rotateZ(0deg); }
           100% { transform: rotateY(360deg) rotateZ(360deg); }
