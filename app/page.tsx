@@ -154,7 +154,7 @@ declare global {
 }
 
 const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
-const PI_SANDBOX = true;
+const PI_SANDBOX = false;
 const PI_AUTH_SCOPES = ['username', 'payments'];
 
 const SUPABASE_URL = 'https://rmaczonfwjmxiggpnueb.supabase.co';
@@ -554,7 +554,7 @@ async function authenticateWithPi() {
   if (!Pi) throw new Error('Pi SDK bulunamadı');
 
   try {
-    Pi.init({ version: '2.0', sandbox: PI_SANDBOX });
+    Pi.init({ version: '2.0', sandbox: false });
   } catch (firstError) {
     try {
       Pi.init({ version: '2.0' });
