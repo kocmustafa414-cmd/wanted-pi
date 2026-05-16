@@ -634,9 +634,18 @@ useEffect(() => {
       setPiPaymentStatus('Pi SDK sadece şimdi yükleniyor...');
       await loadPiSdkOnce();
 
-      if (!window.Pi) throw new Error('Pi SDK bulunamadı. Pi Browser içinde tekrar dene.');
+      if (!window.Pi) {
+        throw new Error('Pi SDK bulunamadı. Pi Browser içinde tekrar dene.');
+      }
 
-      window
+      window.Pi.init({
+        version: '2.0',
+        sandbox: true,
+      });
+
+      if (!window.Pi.createPayment) {
+        throw new Error('Pi SDK başlatılamadı. Pi Browser içinde tekrar dene.');
+      }
 
       setPiPaymentStatus('Pi izin ekranı bekleniyor...');
       await window.Pi.authenticate(['payments'], function onIncompletePaymentFound(payment: any) {
