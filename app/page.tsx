@@ -6,6 +6,12 @@ import {
   Building2, Crown, X, ShieldCheck, CheckCircle, Ban, Wallet, Upload, BadgeCheck
 } from 'lucide-react';
 
+declare global {
+  interface Window {
+    Pi?: any;
+  }
+}
+
 type Role = 'buyer' | 'provider' | 'admin' | null;
 type Page = 'neoHome' | 'jobs' | 'offers' | 'notifications' | 'profile' | 'settings' | 'providerSettings' | 'serviceAdd' | 'providerHome' | 'adminHome';
 type Lang = 'tr' | 'en';
@@ -228,7 +234,7 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 27 — Domain & Mainnet Ready',
+  version: 'Wanted.pi Varan 27.6 — Clean Open + Pi Test Payment',
 };
 
 const IMG = {
@@ -521,6 +527,7 @@ export default function AppPage() {
   const [adminPassOpen, setAdminPassOpen] = useState(false);
   const [adminPass, setAdminPass] = useState('');
   const [toast, setToast] = useState('');
+  const [piPaymentStatus, setPiPaymentStatus] = useState('');
 
   const buyerReady = Boolean(profile.fullName && profile.phone && profile.location);
   const providerReady = Boolean(profile.fullName && profile.phone && profile.company && profile.profession);
@@ -587,6 +594,88 @@ useEffect(() => {
   function showToast(message: string) {
     setToast(message);
     setTimeout(() => setToast(''), 2200);
+  }
+
+  function loadPiSdkOnce() {
+    return new Promise<void>((resolve, reject) => {
+      if (typeof window === 'undefined') return reject(new Error('Tarayıcı ortamı hazır değil'));
+      if (window.Pi) return resolve();
+
+      const existing = document.getElementById('pi-sdk-script');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Pi SDK yüklenemedi')), { once: true });
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'pi-sdk-script';
+      script.src = 'https://sdk.minepi.com/pi-sdk.js';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Pi SDK yüklenemedi'));
+      document.body.appendChild(script);
+    });
+  }
+
+  async function postPiServer(path: string, body: any) {
+    const res = await fetch(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || 'Pi sunucu işlemi başarısız');
+    return data;
+  }
+
+  async function startPiTestPayment() {
+    try {
+      setPiPaymentStatus('Pi SDK sadece şimdi yükleniyor...');
+      await loadPiSdkOnce();
+
+      if (!window.Pi) throw new Error('Pi SDK bulunamadı. Pi Browser içinde tekrar dene.');
+
+      window.Pi.init({ version: '2.0', sandbox: true });
+
+      setPiPaymentStatus('Pi izin ekranı bekleniyor...');
+      await window.Pi.authenticate(['payments'], function onIncompletePaymentFound(payment: any) {
+        console.log('Incomplete Pi payment:', payment);
+      });
+
+      setPiPaymentStatus('Pi test ödeme ekranı açılıyor...');
+      window.Pi.createPayment(
+        {
+          amount: 0.001,
+          memo: 'Wanted.pi checklist test payment',
+          metadata: { app: 'wanted.pi', type: 'mainnet-checklist-test', version: '27.6' },
+        },
+        {
+          onReadyForServerApproval: async function(paymentId: string) {
+            setPiPaymentStatus('Ödeme sunucuda onaylanıyor...');
+            await postPiServer('/api/pi/approve', { paymentId });
+          },
+          onReadyForServerCompletion: async function(paymentId: string, txid: string) {
+            setPiPaymentStatus('Ödeme tamamlanıyor...');
+            await postPiServer('/api/pi/complete', { paymentId, txid });
+            setPiPaymentStatus('Pi test ödeme tamamlandı ✅');
+            showToast('Pi test ödeme tamamlandı');
+          },
+          onCancel: function(paymentId: string) {
+            setPiPaymentStatus('Ödeme iptal edildi');
+            console.log('Pi payment cancelled:', paymentId);
+          },
+          onError: function(error: any, payment?: any) {
+            console.error('Pi payment error:', error, payment);
+            setPiPaymentStatus('Pi ödeme hatası: ' + (error?.message || 'Bilinmeyen hata'));
+          },
+        }
+      );
+    } catch (error: any) {
+      console.error('Pi test payment failed:', error);
+      setPiPaymentStatus(error?.message || 'Pi test ödeme başlatılamadı');
+      showToast(error?.message || 'Pi test ödeme başlatılamadı');
+    }
   }
 
   function updateProfile(key: keyof Profile, value: any) {
@@ -956,6 +1045,8 @@ useEffect(() => {
         <div className="max-w-md mx-auto pt-6">
           <PremiumSplashHero t={t} />
 
+          <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
+
           <h2 className="text-[24px] leading-tight font-black text-[#101828] mb-4">{t.roleSelect}</h2>
           <RoleCard icon={<Search />} title={t.buyer} desc={t.buyerDesc} color="orange" onClick={() => { setRole('buyer'); setPage('neoHome'); }} />
           <RoleCard icon={<Building2 />} title={t.provider} desc={t.providerDesc} color="green" onClick={() => { setRole('provider'); setPage('providerHome'); }} />
@@ -1061,6 +1152,27 @@ useEffect(() => {
       <BottomNav role={role} page={page} setPage={setPage} t={t} />
       {toast && <Toast message={toast} />}
     </Shell>
+  );
+}
+
+function PiTestPaymentCard({ onClick, status }: any) {
+  return (
+    <div className="mb-5 rounded-[28px] bg-white border border-[#D1FADF] shadow-[0_14px_40px_rgba(15,23,42,0.07)] p-4">
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-[#27C267] text-white flex items-center justify-center font-black">π</div>
+        <div className="flex-1">
+          <h3 className="font-black text-[#101828] text-lg">Pi Test Ödeme</h3>
+          <p className="text-sm text-[#667085] mt-1">Uygulama artık açılışta Pi girişine zorlamaz. Pi işlemi sadece bu butona basınca başlar.</p>
+        </div>
+      </div>
+      <button
+        onClick={onClick}
+        className="w-full mt-4 py-4 rounded-2xl bg-[#111] text-white font-black active:scale-[0.99]"
+      >
+        Pi Test Ödeme Yap
+      </button>
+      {status && <p className="mt-3 text-sm font-bold text-[#15803D]">{status}</p>}
+    </div>
   );
 }
 
