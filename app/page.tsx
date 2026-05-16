@@ -155,7 +155,7 @@ declare global {
 
 const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
 const PI_SANDBOX = false;
-const PI_AUTH_SCOPES = ['username', 'payments'];
+const PI_AUTH_SCOPES = ['username'];
 
 const SUPABASE_URL = 'https://rmaczonfwjmxiggpnueb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TadYbajo6iPKMfpsNkWN0g_m35JaScB';
@@ -244,7 +244,7 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 27 — Domain & Mainnet Ready',
+  version: 'Wanted.pi Varan 27.3 — Auth Timeout Safe',
 };
 
 const IMG = {
@@ -556,18 +556,19 @@ async function authenticateWithPi() {
   try {
     Pi.init({ version: '2.0', sandbox: false });
   } catch (firstError) {
-    try {
-      Pi.init({ version: '2.0' });
-    } catch (secondError) {
-      console.log('Pi init uyarısı:', firstError, secondError);
-    }
+    console.log('Pi init uyarısı:', firstError);
   }
 
   const onIncompletePaymentFound = (payment: any) => {
     console.log('Incomplete Pi payment found:', payment);
   };
 
-  return await Pi.authenticate(PI_AUTH_SCOPES, onIncompletePaymentFound);
+  const authPromise = Pi.authenticate(PI_AUTH_SCOPES, onIncompletePaymentFound);
+  const timeoutPromise = new Promise((_, reject) => {
+    window.setTimeout(() => reject(new Error('Pi giriş zaman aşımına uğradı. Pi Browser içinde yeniden dene.')), 12000);
+  });
+
+  return await Promise.race([authPromise, timeoutPromise]);
 }
 
 async function supabaseUploadDocument(file: File, userKey: string) {
@@ -651,17 +652,18 @@ export default function AppPage() {
 
       try {
         if (active) setPiAuth({ status: 'loading', user: null, error: '' });
-        const authResult = await authenticateWithPi();
+        const authResult: any = await authenticateWithPi();
         const user = authResult?.user || authResult || null;
         if (user) localStorage.setItem('wanted-pi-auth-user', JSON.stringify(user));
         if (active) setPiAuth({ status: 'authenticated', user, error: '' });
       } catch (error: any) {
         console.log('Pi auth error:', error);
+        localStorage.removeItem('wanted-pi-auth-user');
         if (active) {
           setPiAuth({
             status: 'error',
             user: null,
-            error: error?.message || 'Pi kimlik doğrulaması başarısız oldu',
+            error: error?.message || 'Pi kimlik doğrulaması başarısız oldu. Uygulama demo modda açılıyor.',
           });
         }
       }
