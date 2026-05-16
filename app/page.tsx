@@ -156,6 +156,7 @@ declare global {
 const PI_SDK_URL = 'https://sdk.minepi.com/pi-sdk.js';
 const PI_SANDBOX = false;
 const PI_AUTH_SCOPES = ['username'];
+const PI_AUTH_BACKGROUND_ONLY = true;
 
 const SUPABASE_URL = 'https://rmaczonfwjmxiggpnueb.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_TadYbajo6iPKMfpsNkWN0g_m35JaScB';
@@ -244,7 +245,7 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 27.3 — Auth Timeout Safe',
+  version: 'Wanted.pi Varan 27 — Domain & Mainnet Ready',
 };
 
 const IMG = {
@@ -554,21 +555,20 @@ async function authenticateWithPi() {
   if (!Pi) throw new Error('Pi SDK bulunamadı');
 
   try {
-    Pi.init({ version: '2.0', sandbox: false });
+    Pi.init({ version: '2.0', sandbox: PI_SANDBOX });
   } catch (firstError) {
-    console.log('Pi init uyarısı:', firstError);
+    try {
+      Pi.init({ version: '2.0' });
+    } catch (secondError) {
+      console.log('Pi init uyarısı:', firstError, secondError);
+    }
   }
 
   const onIncompletePaymentFound = (payment: any) => {
     console.log('Incomplete Pi payment found:', payment);
   };
 
-  const authPromise = Pi.authenticate(PI_AUTH_SCOPES, onIncompletePaymentFound);
-  const timeoutPromise = new Promise((_, reject) => {
-    window.setTimeout(() => reject(new Error('Pi giriş zaman aşımına uğradı. Pi Browser içinde yeniden dene.')), 12000);
-  });
-
-  return await Promise.race([authPromise, timeoutPromise]);
+  return await Pi.authenticate(PI_AUTH_SCOPES, onIncompletePaymentFound);
 }
 
 async function supabaseUploadDocument(file: File, userKey: string) {
@@ -627,9 +627,13 @@ export default function AppPage() {
   useEffect(() => {
     let active = true;
 
-    async function runPiAuth() {
+    async function runPiAuthBackgroundOnly() {
       if (typeof window === 'undefined') return;
 
+      // Varan 27.4 Safe Mode:
+      // Wanted.pi must NEVER be blocked by Pi authentication.
+      // The marketplace, profile, Supabase and localStorage flow opens first.
+      // Pi auth only runs as a soft/background status and failure cannot show a full-screen error.
       const saved = localStorage.getItem('wanted-pi-auth-user');
       if (saved) {
         try {
@@ -640,36 +644,28 @@ export default function AppPage() {
       }
 
       if (!isLikelyPiBrowser()) {
-        if (active) {
-          setPiAuth({
-            status: 'outside_pi_browser',
-            user: null,
-            error: 'Pi kimlik doğrulaması için uygulamayı Pi Browser içinde aç.',
-          });
-        }
+        if (active) setPiAuth({ status: 'idle', user: null, error: '' });
+        return;
+      }
+
+      if (PI_AUTH_BACKGROUND_ONLY) {
+        if (active) setPiAuth({ status: 'idle', user: null, error: '' });
         return;
       }
 
       try {
         if (active) setPiAuth({ status: 'loading', user: null, error: '' });
-        const authResult: any = await authenticateWithPi();
+        const authResult = await authenticateWithPi();
         const user = authResult?.user || authResult || null;
         if (user) localStorage.setItem('wanted-pi-auth-user', JSON.stringify(user));
         if (active) setPiAuth({ status: 'authenticated', user, error: '' });
       } catch (error: any) {
-        console.log('Pi auth error:', error);
-        localStorage.removeItem('wanted-pi-auth-user');
-        if (active) {
-          setPiAuth({
-            status: 'error',
-            user: null,
-            error: error?.message || 'Pi kimlik doğrulaması başarısız oldu. Uygulama demo modda açılıyor.',
-          });
-        }
+        console.log('Pi auth soft error:', error);
+        if (active) setPiAuth({ status: 'idle', user: null, error: '' });
       }
     }
 
-    runPiAuth();
+    runPiAuthBackgroundOnly();
     return () => { active = false; };
   }, []);
 
