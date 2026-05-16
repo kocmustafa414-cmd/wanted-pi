@@ -9,6 +9,7 @@ import {
 declare global {
   interface Window {
     Pi?: any;
+    __wantedPiInitDone?: boolean;
   }
 }
 
@@ -593,18 +594,49 @@ useEffect(() => {
 
   function showToast(message: string) {
     setToast(message);
-    setTimeout(() => setToast(''), 2200);
+    setTimeo
+  useEffect(() => {
+    if (!hydrated) return;
+
+    // Pi.init login başlatmaz; sadece SDK'yı hazırlar.
+    // Bu yüzden uygulama açılırken arka planda güvenli şekilde hazırlıyoruz.
+    loadPiSdkOnce()
+      .then(() => ensurePiInitialized())
+      .catch((error) => {
+        console.log('Pi SDK ön hazırlık atlandı:', error);
+      });
+  }, [hydrated]);
+
+  function wait(ms: number) {
+    return new Promise<void>((resolve) => setTimeout(resolve, ms));
   }
 
   function loadPiSdkOnce() {
     return new Promise<void>((resolve, reject) => {
-      if (typeof window === 'undefined') return reject(new Error('Tarayıcı ortamı hazır değil'));
-      if (window.Pi) return resolve();
+      if (typeof window === 'undefined') {
+        reject(new Error('Tarayıcı ortamı hazır değil'));
+        return;
+      }
 
-      const existing = document.getElementById('pi-sdk-script');
+      if (window.Pi) {
+        resolve();
+        return;
+      }
+
+      const existing = document.getElementById('pi-sdk-script') as HTMLScriptElement | null;
       if (existing) {
-        existing.addEventListener('load', () => resolve(), { once: true });
-        existing.addEventListener('error', () => reject(new Error('Pi SDK yüklenemedi')), { once: true });
+        let attempts = 0;
+        const timer = window.setInterval(() => {
+          attempts += 1;
+          if (window.Pi) {
+            window.clearInterval(timer);
+            resolve();
+          }
+          if (attempts > 80) {
+            window.clearInterval(timer);
+            reject(new Error('Pi SDK yüklenemedi'));
+          }
+        }, 100);
         return;
       }
 
@@ -612,10 +644,63 @@ useEffect(() => {
       script.id = 'pi-sdk-script';
       script.src = 'https://sdk.minepi.com/pi-sdk.js';
       script.async = true;
-      script.onload = () => resolve();
+
+      script.onload = () => {
+        let attempts = 0;
+        const timer = window.setInterval(() => {
+          attempts += 1;
+          if (window.Pi) {
+            window.clearInterval(timer);
+            resolve();
+          }
+          if (attempts > 80) {
+            window.clearInterval(timer);
+            reject(new Error('Pi SDK yüklendi ama Pi nesnesi bulunamadı'));
+          }
+        }, 100);
+      };
+
       script.onerror = () => reject(new Error('Pi SDK yüklenemedi'));
-      document.body.appendChild(script);
+      document.head.appendChild(script);
     });
+  }
+
+  async function ensurePiInitialized() {
+    if (typeof window === 'undefined') {
+      throw new Error('Tarayıcı ortamı hazır değil');
+    }
+
+    await loadPiSdkOnce();
+
+    if (!window.Pi) {
+      throw new Error('Pi SDK bulunamadı. Pi Browser içinde tekrar dene.');
+    }
+
+    if (typeof window.Pi.init !== 'function') {
+      throw new Error('Pi.init bulunamadı. Pi Browser içinde tekrar dene.');
+    }
+
+    try {
+      const initResult = window.Pi.init({
+        version: '2.0',
+        sandbox: true,
+      });
+
+      if (initResult && typeof initResult.then === 'function') {
+        await initResult;
+      }
+
+      window.__wantedPiInitDone = true;
+      await wait(500);
+    } catch (error: any) {
+      const message = String(error?.message || '');
+      if (!message.toLowerCase().includes('already')) {
+        throw error;
+      }
+      window.__wantedPiInitDone = true;
+    }
+
+    return window.Pi;
   }
 
   async function postPiServer(path: string, body: any) {
@@ -625,39 +710,37 @@ useEffect(() => {
       body: JSON.stringify(body),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data?.error || 'Pi sunucu işlemi başarısız');
+    if (!res.ok) throw new Error(data?.error || `Pi sunucu işlemi başarısız: ${path}`);
     return data;
   }
 
   async function startPiTestPayment() {
     try {
-      setPiPaymentStatus('Pi SDK sadece şimdi yükleniyor...');
-      await loadPiSdkOnce();
+      setPiPaymentStatus('Pi SDK hazırlanıyor...');
+      const Pi = await ensurePiInitialized();
 
-      if (!window.Pi) {
-        throw new Error('Pi SDK bulunamadı. Pi Browser içinde tekrar dene.');
-      }
-
-      window.Pi.init({
-        version: '2.0',
-        sandbox: true,
-      });
-
-      if (!window.Pi.createPayment) {
-        throw new Error('Pi SDK başlatılamadı. Pi Browser içinde tekrar dene.');
+      if (!Pi.createPayment) {
+        throw new Error('Pi ödeme metodu bulunamadı. Pi Browser içinde tekrar dene.');
       }
 
       setPiPaymentStatus('Pi izin ekranı bekleniyor...');
-      await window.Pi.authenticate(['payments'], function onIncompletePaymentFound(payment: any) {
-        console.log('Incomplete Pi payment:', payment);
-      });
+      if (typeof Pi.authenticate === 'function') {
+        await Pi.authenticate(['payments'], function onIncompletePaymentFound(payment: any) {
+          console.log('Incomplete Pi payment:', payment);
+        });
+      }
 
       setPiPaymentStatus('Pi test ödeme ekranı açılıyor...');
-      window.Pi.createPayment(
+
+      Pi.createPayment(
         {
           amount: 0.001,
           memo: 'Wanted.pi checklist test payment',
-          metadata: { app: 'wanted.pi', type: 'mainnet-checklist-test', version: '27.6' },
+          metadata: {
+            app: 'wanted.pi',
+            type: 'mainnet-checklist-test',
+            version: '27.7',
+          },
         },
         {
           onReadyForServerApproval: async function(paymentId: string) {
@@ -684,6 +767,9 @@ useEffect(() => {
       console.error('Pi test payment failed:', error);
       setPiPaymentStatus(error?.message || 'Pi test ödeme başlatılamadı');
       showToast(error?.message || 'Pi test ödeme başlatılamadı');
+    }
+  }
+ ödeme başlatılamadı');
     }
   }
 
