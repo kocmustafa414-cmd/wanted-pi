@@ -10,6 +10,13 @@ type Role = 'buyer' | 'provider' | 'admin' | null;
 type Page = 'neoHome' | 'jobs' | 'offers' | 'notifications' | 'profile' | 'settings' | 'providerSettings' | 'serviceAdd' | 'providerHome' | 'adminHome';
 type Lang = 'tr' | 'en';
 
+declare global {
+  interface Window {
+    Pi?: any;
+  }
+}
+
+
 type Service = {
   id: string;
   title: string;
@@ -521,6 +528,7 @@ export default function AppPage() {
   const [adminPassOpen, setAdminPassOpen] = useState(false);
   const [adminPass, setAdminPass] = useState('');
   const [toast, setToast] = useState('');
+  const [piPaymentStatus, setPiPaymentStatus] = useState('');
 
   const buyerReady = Boolean(profile.fullName && profile.phone && profile.location);
   const providerReady = Boolean(profile.fullName && profile.phone && profile.company && profile.profession);
@@ -587,6 +595,84 @@ useEffect(() => {
   function showToast(message: string) {
     setToast(message);
     setTimeout(() => setToast(''), 2200);
+  }
+
+  function loadPiSdk(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined') return reject(new Error('Tarayıcı hazır değil'));
+      if (window.Pi) return resolve(window.Pi);
+
+      const existing = document.getElementById('pi-sdk-script') as HTMLScriptElement | null;
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.Pi));
+        existing.addEventListener('error', () => reject(new Error('Pi SDK yüklenemedi')));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'pi-sdk-script';
+      script.src = 'https://sdk.minepi.com/pi-sdk.js';
+      script.async = true;
+      script.onload = () => resolve(window.Pi);
+      script.onerror = () => reject(new Error('Pi SDK yüklenemedi'));
+      document.body.appendChild(script);
+    });
+  }
+
+  async function handlePiTestPayment() {
+    try {
+      setPiPaymentStatus('Pi ödeme ekranı hazırlanıyor...');
+      showToast('Pi ödeme ekranı hazırlanıyor...');
+
+      const Pi = await loadPiSdk();
+      if (!Pi) throw new Error('Pi SDK bulunamadı');
+
+      Pi.init({ version: '2.0', sandbox: true });
+
+      await Pi.authenticate(['payments'], (payment: any) => {
+        console.log('Incomplete Pi payment:', payment);
+      });
+
+      setPiPaymentStatus('Pi ödeme onayı bekleniyor...');
+
+      Pi.createPayment(
+        {
+          amount: 0.01,
+          memo: 'Wanted.pi Mainnet Checklist Test Payment',
+          metadata: {
+            app: 'Wanted.pi',
+            purpose: 'checklist-transaction-test',
+            version: 'Varan 27.5',
+          },
+        },
+        {
+          onReadyForServerApproval: function(paymentId: string) {
+            console.log('Ready for server approval:', paymentId);
+            setPiPaymentStatus('Ödeme oluşturuldu. Pi onay adımı başladı.');
+            showToast('Ödeme oluşturuldu');
+          },
+          onReadyForServerCompletion: function(paymentId: string, txid: string) {
+            console.log('Ready for server completion:', paymentId, txid);
+            setPiPaymentStatus('Ödeme işlemi Pi tarafında tamamlanma aşamasına geçti.');
+            showToast('Pi ödeme işlemi tamamlanma aşamasında');
+          },
+          onCancel: function(paymentId: string) {
+            console.log('Pi payment cancelled:', paymentId);
+            setPiPaymentStatus('Ödeme iptal edildi.');
+            showToast('Ödeme iptal edildi');
+          },
+          onError: function(error: any, payment?: any) {
+            console.log('Pi payment error:', error, payment);
+            setPiPaymentStatus('Pi ödeme hatası: ' + (error?.message || 'Tekrar dene'));
+            showToast('Pi ödeme hatası');
+          },
+        }
+      );
+    } catch (error: any) {
+      console.log('Pi test payment error:', error);
+      setPiPaymentStatus('Pi ödeme başlatılamadı. Pi Browser içinde açıp tekrar dene.');
+      showToast('Pi ödeme başlatılamadı');
+    }
   }
 
   function updateProfile(key: keyof Profile, value: any) {
@@ -955,6 +1041,7 @@ useEffect(() => {
         <PiDomainValidationHidden />
         <div className="max-w-md mx-auto pt-6">
           <PremiumSplashHero t={t} />
+          <PiTestPaymentCard onPay={handlePiTestPayment} status={piPaymentStatus} />
 
           <h2 className="text-[24px] leading-tight font-black text-[#101828] mb-4">{t.roleSelect}</h2>
           <RoleCard icon={<Search />} title={t.buyer} desc={t.buyerDesc} color="orange" onClick={() => { setRole('buyer'); setPage('neoHome'); }} />
@@ -1023,6 +1110,8 @@ useEffect(() => {
   return (
     <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
       {page === 'neoHome' && (
+        <>
+          <PiTestPaymentCard onPay={handlePiTestPayment} status={piPaymentStatus} />
         <BuyerNeoHome
           t={t}
           query={query}
@@ -1032,6 +1121,7 @@ useEffect(() => {
           filteredServices={filteredServices}
           onSelectService={setSelectedService}
         />
+        </>
       )}
 
       {page === 'jobs' && <BuyerJobs t={t} requests={requests.filter((r) => r.owner === 'me')} offers={offers} onOfferClick={setOfferDetail} />}
@@ -2211,6 +2301,36 @@ function MiniStat({ icon, label }: any) {
 
 function AdminStat({ title, value }: any) {
   return <div className="rounded-[28px] bg-white border border-[#EAECF0] p-5 shadow-[0_14px_35px_rgba(15,23,42,0.06)]"><p className="text-[#667085] text-sm font-semibold">{title}</p><b className="text-3xl text-[#101828]">{value}</b></div>;
+}
+
+
+function PiTestPaymentCard({ onPay, status }: any) {
+  return (
+    <div className="mb-5 rounded-[28px] bg-gradient-to-br from-[#101828] to-[#0B5E37] p-5 text-white shadow-[0_18px_45px_rgba(15,23,42,0.18)] border border-white/20">
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center shrink-0">
+          <Wallet size={24} />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-xl font-black">Pi Test Ödeme</h3>
+          <p className="text-sm text-white/75 mt-1">
+            Mainnet checklist son madde için 0.01 Pi test işlemini buradan başlat.
+          </p>
+        </div>
+      </div>
+      {status && (
+        <div className="mt-4 rounded-2xl bg-white/10 px-4 py-3 text-sm font-bold text-white/90">
+          {status}
+        </div>
+      )}
+      <button
+        onClick={onPay}
+        className="w-full mt-4 py-4 rounded-2xl bg-[#27C267] text-white font-black text-lg shadow-lg active:scale-[0.99]"
+      >
+        Pi Test Ödeme Yap
+      </button>
+    </div>
+  );
 }
 
 function Toast({ message }: any) {
