@@ -6,12 +6,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      approved: true,
+      completed: true,
       paymentId: body.paymentId || body.identifier,
     });
   } catch (error) {
     return NextResponse.json(
-      { error: "Approve failed" },
+      { error: "Complete failed" },
       { status: 500 }
     );
   }
