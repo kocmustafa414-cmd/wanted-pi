@@ -20,24 +20,39 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const paymentId = body.paymentId || body.identifier || body.payment_id;
+
+    const paymentId =
+      body.paymentId ||
+      body.identifier ||
+      body.payment_id ||
+      body.payment?.identifier;
+
     const apiKey = getPiApiKey();
 
     if (!paymentId) {
-      return NextResponse.json({ error: "paymentId missing" }, { status: 400 });
+      return NextResponse.json(
+        { error: "paymentId missing", received: body },
+        { status: 400 }
+      );
     }
 
     if (!apiKey) {
-      return NextResponse.json({ error: "PI_API_KEY missing" }, { status: 500 });
+      return NextResponse.json(
+        { error: "PI_API_KEY missing" },
+        { status: 500 }
+      );
     }
 
-    const response = await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
-      method: "POST",
-      headers: {
-        Authorization: `Key ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      `https://api.minepi.com/v2/payments/${paymentId}/approve`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Key ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const data = await response.json();
 
