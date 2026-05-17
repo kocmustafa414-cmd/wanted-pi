@@ -1199,12 +1199,6 @@ useEffect(() => {
               </div>
               <WantedShareCard />
               <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
-              <button
-                onClick={() => { setAdminPassOpen(true); setLandingMenuOpen(false); }}
-                className="w-full mt-1 py-4 rounded-2xl bg-[#101828] text-white font-black"
-              >
-                Yönetici Girişi
-              </button>
             </BottomSheet>
           )}
 
@@ -1315,24 +1309,36 @@ useEffect(() => {
 
 function LandingWantedCenter() {
   return (
-    <div className="flex-1 min-h-[260px] rounded-[36px] bg-gradient-to-br from-white via-[#F8FFFB] to-[#EAF8F0] border border-white shadow-[0_24px_70px_rgba(15,23,42,0.10)] my-3 p-5 flex flex-col items-center justify-center text-center relative overflow-hidden">
-      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-[#27C267]/12 blur-3xl" />
-      <div className="relative w-34 h-34 rounded-full bg-gradient-to-br from-[#052E1F] via-[#0B5E37] to-[#0ABF6A] shadow-[0_0_55px_rgba(39,194,103,0.34)] flex items-center justify-center border-[6px] border-[#F4D06F]/80">
-        <div className="absolute inset-[-12px] rounded-full border-2 border-[#27C267]/35 animate-[orbitSpin_8s_linear_infinite]" />
+    <div className="flex-1 min-h-[270px] rounded-[36px] bg-gradient-to-br from-white via-[#F8FBFF] to-[#EEF7FF] border border-white shadow-[0_24px_70px_rgba(15,23,42,0.10)] my-3 p-5 flex flex-col items-center justify-center text-center relative overflow-hidden">
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-[#2563EB]/12 blur-3xl" />
+      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white/70 to-transparent" />
+
+      <div className="relative w-36 h-36 rounded-full bg-gradient-to-br from-[#075985] via-[#1D4ED8] to-[#38BDF8] shadow-[0_0_70px_rgba(37,99,235,0.42)] flex items-center justify-center border-[6px] border-[#F4D06F]/80">
+        <div className="absolute inset-[-10px] rounded-full border-2 border-[#60A5FA]/40 animate-[orbitSpin_7s_linear_infinite]" />
         <div
-          className="absolute inset-[-20px] rounded-full border-[3px] animate-[orbitReverse_5.8s_linear_infinite]"
+          className="absolute inset-[-18px] rounded-full border-[4px] animate-[orbitReverse_5.2s_linear_infinite]"
           style={{ borderColor: '#EF4444 transparent #F59E0B #EF4444' }}
         />
-        <div className="absolute w-5 h-5 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -left-2 top-1/2" />
-        <div className="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -right-1 top-[56%]" />
+        <div className="absolute inset-[-34px] rounded-full animate-[orbitSpin_9s_linear_infinite]">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <span
+              key={i}
+              className="absolute left-1/2 top-1/2 h-[3px] w-8 origin-left rounded-full bg-[#60A5FA]/70 shadow-[0_0_14px_rgba(96,165,250,0.95)]"
+              style={{ transform: `rotate(${i * 20}deg) translateX(74px)` }}
+            />
+          ))}
+        </div>
+        <div className="absolute w-5 h-5 rounded-full bg-white shadow-[0_0_18px_rgba(96,165,250,0.95)] -left-2 top-1/2" />
+        <div className="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_18px_rgba(96,165,250,0.95)] -right-1 top-[56%]" />
         <span className="relative text-[82px] leading-none font-black text-white drop-shadow-[0_7px_10px_rgba(0,0,0,0.35)]">W</span>
       </div>
+
       <div className="mt-5 flex items-center justify-center gap-1">
         <h1 className="text-[46px] leading-none font-black tracking-tight text-[#0B1F17]">Wanted</h1>
         <span className="text-[46px] leading-none font-black text-[#16A34A]">.pi</span>
       </div>
       <div className="mt-3 h-7 flex justify-center overflow-hidden">
-        <p className="text-[17px] font-black text-[#101828] whitespace-nowrap overflow-hidden border-r-2 border-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards]">Arayan bulur, çalışan kazanır.</p>
+        <p className="text-[17px] font-black text-[#16A34A] whitespace-nowrap overflow-hidden border-r-2 border-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards]">Arayan bulur, çalışan kazanır.</p>
       </div>
       <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
       <style>{`
@@ -1495,9 +1501,14 @@ function PremiumWantedHero({ role }: any) {
   return (
     <div className="relative text-center py-8">
       <div className="relative mx-auto w-36 h-36 rounded-full bg-gradient-to-br from-[#062B1F] via-[#0B5E37] to-[#0ABF6A] shadow-[0_0_45px_rgba(39,194,103,0.35)] flex items-center justify-center">
-        <div className="absolute inset-[-10px] rounded-full border-2 border-[#27C267]/40 animate-[spinSlow_7s_linear_infinite]" />
-        <div className="absolute inset-[-20px] rounded-full border border-[#27C267]/20 animate-[spinReverse_10s_linear_infinite]" />
-        <span className="text-7xl font-black text-white drop-shadow-lg">W</span>
+        <div className="absolute inset-[-10px] rounded-full border-2 border-[#60A5FA]/50 animate-[spinSlow_7s_linear_infinite]" />
+        <div className="absolute inset-[-20px] rounded-full border-[3px] animate-[spinReverse_10s_linear_infinite]" style={{ borderColor: '#EF4444 transparent #60A5FA #EF4444' }} />
+        <div className="absolute inset-[-32px] rounded-full animate-[spinSlow_9s_linear_infinite]">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span key={i} className="absolute left-1/2 top-1/2 h-[3px] w-7 origin-left rounded-full bg-[#60A5FA]/70 shadow-[0_0_14px_rgba(96,165,250,0.9)]" style={{ transform: `rotate(${i * 22.5}deg) translateX(68px)` }} />
+          ))}
+        </div>
+        <span className="text-7xl font-black text-[#2563EB] drop-shadow-[0_0_14px_rgba(96,165,250,0.85)]">W</span>
       </div>
 
       <div className="mt-5 flex items-center justify-center gap-2">
@@ -1536,10 +1547,19 @@ function BuyerNeoHome({ t, query, setQuery, trendServices, sections, filteredSer
   return (
     <div className="space-y-8">
       <div className="pt-4 text-center">
-        <div className="inline-flex items-center gap-2 mb-5">
+        <div className="inline-flex items-center gap-3 mb-5 px-4 py-3 rounded-[28px] bg-white/85 border border-[#EAECF0] shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
           <div className="w-10 h-10 rounded-full bg-[#27C267] flex items-center justify-center text-white font-black">W</div>
-          <h1 className="text-4xl font-black tracking-tight text-[#111]">Wanted<span className="text-[#27C267]">.pi</span></h1>
+          <div className="text-left">
+            <h1 className="text-[34px] leading-none font-black tracking-tight text-[#101828] whitespace-nowrap overflow-hidden border-r-2 border-[#27C267] animate-[buyerTitleType_1.9s_steps(16)_forwards]">Ek talep oluştur</h1>
+            <p className="text-xs font-bold text-[#16A34A] mt-1">Wanted.pi ile doğru hizmeti bul</p>
+          </div>
         </div>
+        <style>{`
+          @keyframes buyerTitleType {
+            from { width: 0; }
+            to { width: 265px; }
+          }
+        `}</style>
 
         <div className="relative rounded-full bg-white p-2 shadow-[0_12px_32px_rgba(15,23,42,0.12)] border border-gray-100 flex items-center gap-2">
           <input
