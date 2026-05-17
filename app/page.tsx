@@ -1172,33 +1172,31 @@ useEffect(() => {
 
           {landingMenuOpen && (
             <BottomSheet onClose={() => setLandingMenuOpen(false)}>
-              <h2 className="text-[26px] leading-tight font-black text-[#101828] mb-2">Wanted.pi Menü</h2>
-              <p className="text-sm text-[#667085] mb-4">Paylaş, test ödeme ve destek araçları burada. Ana ekran sade kalsın diye bu menüye aldık.</p>
-              <div className="grid grid-cols-1 gap-3 mb-4">
-                <LandingMenuAction
-                  title="Wanted ulaş"
-                  desc="Destek, iletişim ve geri bildirim alanı."
-                  emoji="📩"
-                  tone="blue"
-                  onClick={() => alert('Wanted ulaş alanı sonraki güncellemede aktif edilecek.')}
-                />
-                <LandingMenuAction
-                  title="Wanted sor"
-                  desc="Küçük yardımcı: uygulama, talep ve teklif sorularını cevaplayacak."
-                  emoji="🤖"
-                  tone="purple"
-                  onClick={() => alert('Wanted sor yardımcı alanı sonraki güncellemede aktif edilecek.')}
-                />
-                <LandingMenuAction
-                  title="Reklam ver"
-                  desc="Hizmet verenler için vitrin ve öne çıkarma alanı."
-                  emoji="📣"
-                  tone="orange"
-                  onClick={() => alert('Reklam ver alanı sonraki güncellemede aktif edilecek.')}
-                />
+              <div className="-m-6 mb-0 rounded-t-[34px] bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#042F2E] p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.35)]">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-14 h-14 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center text-2xl font-black shadow-[0_0_22px_rgba(37,99,235,0.55)]">W</div>
+                  <div>
+                    <h2 className="text-[26px] leading-tight font-black">Wanted.pi Menü</h2>
+                    <p className="text-sm text-white/70">İçindekiler ve hızlı araçlar</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3 mb-4">
+                  <LandingMenuAction title="Hizmet Al" desc="Talep oluştur, usta bul" emoji="🔎" tone="orange" onClick={() => { setLandingMenuOpen(false); setRole('buyer'); setPage('neoHome'); }} />
+                  <LandingMenuAction title="Hizmet Ver" desc="Teklif ver, iş bul" emoji="💼" tone="green" onClick={() => { setLandingMenuOpen(false); setRole('provider'); setPage('providerHome'); }} />
+                  <LandingMenuAction title="Şifreler" desc="Giriş ve güvenlik tercihleri" emoji="🔐" tone="purple" onClick={() => alert('Şifreler alanı sonraki güncellemede aktif edilecek.')} />
+                  <LandingMenuAction title="Ödemeler" desc="Pi Cüzdan, IBAN ve ödeme tercihleri" emoji="💳" tone="yellow" onClick={() => alert('Ödemeler alanı sonraki güncellemede aktif edilecek.')} />
+                  <LandingMenuAction title="Arkadaşına tavsiye et" desc="Pi Tarayıcı, Telegram veya WhatsApp ile paylaş" emoji="🔗" tone="blue" onClick={shareWantedApp} />
+                  <LandingMenuAction title="Uygulamayı değerlendir" desc="Kullanma deneyimini değerlendir" emoji="⭐" tone="pink" onClick={() => alert('Değerlendirme alanı sonraki güncellemede aktif edilecek.')} />
+                  <div className="h-px bg-white/10 my-1" />
+                  <LandingMenuAction title="Wanted ulaş" desc="Bizimle iletişime geç" emoji="✉️" tone="blue" onClick={() => alert('Wanted ulaş alanı sonraki güncellemede aktif edilecek.')} />
+                  <LandingMenuAction title="Wanted sor" desc="Sık sorulan sorular" emoji="❓" tone="orange" onClick={() => alert('Wanted sor yardımcı alanı sonraki güncellemede aktif edilecek.')} />
+                  <LandingMenuAction title="Reklam ver" desc="Hizmetini daha çok kişiye ulaştır" emoji="📣" tone="pink" onClick={() => alert('Reklam ver alanı sonraki güncellemede aktif edilecek.')} />
+                </div>
               </div>
-              <WantedShareCard />
-              <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
+              <div className="pt-5">
+                <WantedShareCard />
+                <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
+              </div>
             </BottomSheet>
           )}
 
@@ -1396,21 +1394,24 @@ function LandingMiniTrust({ label }: any) {
 
 function LandingMenuAction({ title, desc, emoji, tone, onClick }: any) {
   const tones: any = {
-    blue: 'from-[#EFF6FF] to-white border-[#93C5FD] text-[#1D4ED8]',
-    purple: 'from-[#F5F3FF] to-white border-[#C4B5FD] text-[#6D28D9]',
-    orange: 'from-[#FFF7ED] to-white border-[#FDBA74] text-[#C2410C]',
+    blue: 'from-[#0EA5E9] to-[#2563EB]',
+    purple: 'from-[#8B5CF6] to-[#6D28D9]',
+    orange: 'from-[#F97316] to-[#EA580C]',
+    green: 'from-[#22C55E] to-[#15803D]',
+    yellow: 'from-[#FBBF24] to-[#D97706]',
+    pink: 'from-[#EC4899] to-[#BE185D]',
   };
   return (
     <button
       onClick={onClick}
-      className={`w-full rounded-3xl border bg-gradient-to-br ${tones[tone] || tones.blue} p-4 flex items-center gap-3 text-left shadow-sm active:scale-[0.99]`}
+      className="w-full rounded-3xl border border-white/10 bg-white/6 p-3 flex items-center gap-3 text-left shadow-sm active:scale-[0.99] hover:bg-white/10 transition-all"
     >
-      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm">{emoji}</div>
+      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${tones[tone] || tones.blue} flex items-center justify-center text-2xl shadow-[0_0_18px_rgba(255,255,255,0.14)]`}>{emoji}</div>
       <div className="flex-1">
-        <h3 className="text-lg font-black text-[#101828]">{title}</h3>
-        <p className="text-xs text-[#667085] mt-1 leading-snug">{desc}</p>
+        <h3 className="text-lg font-black text-white">{title}</h3>
+        <p className="text-xs text-white/65 mt-1 leading-snug">{desc}</p>
       </div>
-      <ChevronRight size={20} className="text-[#667085]" />
+      <ChevronRight size={20} className="text-white/55" />
     </button>
   );
 }
@@ -1517,7 +1518,7 @@ function PremiumWantedHero({ role }: any) {
       </div>
 
       <div className="h-8 mt-3 overflow-hidden">
-        <p className="text-lg font-black text-[#27C267] animate-[typePulse_3.6s_steps(28)_infinite] whitespace-nowrap mx-auto border-r-2 border-[#27C267] max-w-fit">
+        <p className="text-lg font-black text-[#27C267] animate-[typeOnce_2.8s_steps(28)_forwards] whitespace-nowrap mx-auto border-r-2 border-[#27C267] max-w-fit">
           Arayan bulur, çalışan kazanır.
         </p>
       </div>
@@ -1531,11 +1532,9 @@ function PremiumWantedHero({ role }: any) {
           from { transform: rotate(360deg); }
           to { transform: rotate(0deg); }
         }
-        @keyframes typePulse {
-          0% { width: 0; opacity: 1; }
-          45% { width: 280px; opacity: 1; }
-          70% { width: 280px; opacity: 1; }
-          100% { width: 0; opacity: .55; }
+        @keyframes typeOnce {
+          from { width: 0; }
+          to { width: 270px; }
         }
       `}</style>
     </div>
@@ -1550,16 +1549,42 @@ function BuyerNeoHome({ t, query, setQuery, trendServices, sections, filteredSer
         <div className="inline-flex items-center gap-3 mb-5 px-4 py-3 rounded-[28px] bg-white/85 border border-[#EAECF0] shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
           <div className="w-10 h-10 rounded-full bg-[#27C267] flex items-center justify-center text-white font-black">W</div>
           <div className="text-left">
-            <h1 className="text-[34px] leading-none font-black tracking-tight text-[#101828] whitespace-nowrap overflow-hidden border-r-2 border-[#27C267] animate-[buyerTitleType_1.9s_steps(16)_forwards]">Ek talep oluştur</h1>
-            <p className="text-xs font-bold text-[#16A34A] mt-1">Wanted.pi ile doğru hizmeti bul</p>
+            <h1 className="text-[34px] leading-none font-black tracking-tight text-[#101828] whitespace-nowrap overflow-hidden border-r-2 border-[#27C267] animate-[buyerTitleType_1.9s_steps(16)_forwards]">Wanted.pi</h1>
+            <p className="text-xs font-bold text-[#16A34A] mt-1">Doğru hizmeti bul, talebini oluştur.</p>
           </div>
         </div>
         <style>{`
           @keyframes buyerTitleType {
             from { width: 0; }
-            to { width: 265px; }
+            to { width: 178px; }
+          }
+          @keyframes buyerMiniSlide {
+            0% { transform: translateX(0); }
+            28% { transform: translateX(0); }
+            36% { transform: translateX(-100%); }
+            64% { transform: translateX(-100%); }
+            72% { transform: translateX(-200%); }
+            100% { transform: translateX(-200%); }
           }
         `}</style>
+
+        <div className="mb-4 overflow-hidden rounded-[28px] border border-[#FDBA74]/70 bg-white shadow-[0_12px_32px_rgba(194,65,12,0.08)]">
+          <div className="flex w-[300%] animate-[buyerMiniSlide_8s_ease-in-out_infinite]">
+            {[
+              { title: 'Talep oluştur', text: 'İhtiyacını yaz, uygun hizmet verenler teklif versin.', icon: '📝', bg: 'from-[#FFF7ED] to-white', color: '#C2410C' },
+              { title: 'Teklifleri karşılaştır', text: 'Fiyat, deneyim ve belge durumuna göre seç.', icon: '⚖️', bg: 'from-[#EFF6FF] to-white', color: '#1D4ED8' },
+              { title: 'Güvenli ilerle', text: 'Pi destekli, KYC hedefli hizmet pazarı.', icon: '🛡️', bg: 'from-[#ECFDF3] to-white', color: '#15803D' },
+            ].map((x) => (
+              <div key={x.title} className={`w-1/3 shrink-0 p-4 bg-gradient-to-br ${x.bg} flex items-center gap-3 text-left`}>
+                <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm">{x.icon}</div>
+                <div>
+                  <h3 className="font-black text-[#101828] text-lg">{x.title}</h3>
+                  <p className="text-xs text-[#667085] leading-snug">{x.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="relative rounded-full bg-white p-2 shadow-[0_12px_32px_rgba(15,23,42,0.12)] border border-gray-100 flex items-center gap-2">
           <input
