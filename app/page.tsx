@@ -280,78 +280,7 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 24.3 — Working Language Switch',
-};
-
-
-const translations: Record<Lang, typeof t> = {
-  tr: t,
-  en: {
-    ...t,
-    slogan: 'Those who search find, those who work earn.',
-    buyer: 'Find Service',
-    provider: 'Offer Service',
-    roleSelect: 'How would you like to continue?',
-    buyerDesc: 'Find a service, expert or worker',
-    providerDesc: 'Offer services, send quotes, get jobs',
-    search: 'What service do you need?',
-    trends: 'Trending Services',
-    jobs: 'My Jobs',
-    openJobs: 'Open Request Market',
-    offers: 'Offers',
-    notifications: 'Notifications',
-    profile: 'Profile',
-    myServices: 'My Services',
-    createRequest: 'Create Request',
-    createOffer: `Send Offer • ${OFFER_FEE_PI} Pi (~₺${OFFER_FEE_TL})`,
-    incomingOffers: 'Incoming Offers',
-    myOffers: 'My Sent Offers',
-    selectOffer: 'Select Offer',
-    ignoreOffer: 'Ignore',
-    selectedOffer: 'Selected Offer',
-    requestDetail: 'Request Detail',
-    completeProfile: 'Complete your profile before creating a request',
-    completeProvider: 'Register before offering services',
-    name: 'Full Name',
-    phone: 'Phone',
-    location: 'Location',
-    budget: 'Budget',
-    date: 'Date',
-    description: 'Description',
-    company: 'Company / Individual',
-    experience: 'Experience',
-    certificate: 'Certificate / Document',
-    price: 'Offer Price',
-    message: 'Message / Description',
-    save: 'Save',
-    cancel: 'Cancel',
-    dbSaved: 'Request created and saved to database',
-    offerSaved: 'Offer sent',
-    selected: 'Offer selected and job started',
-    activeJobs: 'Active Jobs',
-    completeJob: 'Complete Job',
-    jobStarted: 'Job started',
-    jobCompleted: 'Job completed',
-    reviewJob: 'Add Review',
-    reviewSaved: 'Review and rating saved',
-    providerRating: 'Provider Rating',
-    messages: 'Messages',
-    sendMessage: 'Send Message',
-    ignored: 'Offer ignored',
-    wallet: 'Wallet',
-    balance: 'Demo Balance',
-    buyerSettings: 'Settings',
-    myProfile: 'My Profile',
-    passwords: 'Passwords',
-    paymentOptions: 'Payment Options',
-    inviteFriend: 'Invite a friend',
-    rateApp: 'Rate the app',
-    supportCenter: 'Support Center',
-    dataPrivacy: 'Data and privacy',
-    complaintSuggestion: 'Complaint and suggestion',
-    logout: 'Logout',
-    version: 'Wanted.pi Varan 24.3 — Working Language Switch',
-  },
+  version: 'Wanted.pi Varan 27.6 — Clean Open + Pi Test Payment',
 };
 
 const IMG = {
@@ -625,8 +554,6 @@ async function supabaseUploadDocument(file: File, userKey: string) {
 
 export default function AppPage() {
   const [hydrated, setHydrated] = useState(false);
-  const [lang, setLang] = useState<Lang>('tr');
-  const t = translations[lang];
   const [role, setRole] = useState<Role>(null);
   const [page, setPage] = useState<Page>('neoHome');
   const [query, setQuery] = useState('');
@@ -668,7 +595,6 @@ useEffect(() => {
 
       if (parsedData) {
         const data = parsedData;
-        if (data.lang === 'tr' || data.lang === 'en') setLang(data.lang);
         if (data.role) setRole(data.role);
         if (data.page) setPage(data.page);
         const safe = buildSafeSnapshot(data);
@@ -694,10 +620,10 @@ useEffect(() => {
     let previous: any = {};
     try { previous = previousRaw ? JSON.parse(previousRaw) : {}; } catch {}
     const safeProfile = isProfileFilled(profile) ? profile : mergeProfileSafe(defaultProfile, previous.profile || {});
-    const snapshot = { lang, role, page, profile: safeProfile, requests, offers, jobs, messages, documents, reviews, escrows };
+    const snapshot = { role, page, profile: safeProfile, requests, offers, jobs, messages, documents, reviews, escrows };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(snapshot));
-  }, [hydrated, lang, role, page, profile, requests, offers, jobs, messages, documents, reviews, escrows]);
+  }, [hydrated, role, page, profile, requests, offers, jobs, messages, documents, reviews, escrows]);
 
   const filteredServices = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -1217,15 +1143,12 @@ useEffect(() => {
             >
               ☰
             </button>
-            <div className="flex items-center gap-2">
-              <LanguageToggle lang={lang} setLang={setLang} />
-              <div className="px-3 py-2 rounded-full bg-white/80 border border-white shadow-sm text-[11px] font-black text-[#12864F]">{lang === 'tr' ? 'Pi + Web3' : 'Pi + Web3'}</div>
-            </div>
+            <div className="px-4 py-2 rounded-full bg-white/80 border border-white shadow-sm text-xs font-black text-[#12864F]">Pi + Web3 hizmet pazarı</div>
           </div>
 
           <LandingRoleButton
             title="Hizmet Al"
-            desc="{lang === 'tr' ? 'Usta, uzman veya çalışan bul. Talep oluştur, teklifleri karşılaştır.' : 'Find a professional, create a request and compare offers.'}"
+            desc="Usta, uzman veya çalışan bul. Talep oluştur, teklifleri karşılaştır."
             icon={<Search size={28} />}
             tone="buyer"
             onClick={() => { setRole('buyer'); setPage('neoHome'); }}
@@ -1253,8 +1176,8 @@ useEffect(() => {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-14 h-14 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center text-2xl font-black shadow-[0_0_22px_rgba(37,99,235,0.55)]">W</div>
                   <div>
-                    <h2 className="text-[26px] leading-tight font-black">{lang === 'tr' ? 'Wanted.pi Menü' : 'Wanted.pi Menu'}</h2>
-                    <p className="text-sm text-white/70">{lang === 'tr' ? 'İçindekiler ve hızlı araçlar' : 'Contents and quick tools'}</p>
+                    <h2 className="text-[26px] leading-tight font-black">Wanted.pi Menü</h2>
+                    <p className="text-sm text-white/70">İçindekiler ve hızlı araçlar</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-3 mb-4">
@@ -1305,7 +1228,7 @@ useEffect(() => {
 
   if (role === 'provider') {
     return (
-      <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
+      <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
         {page === 'providerHome' && <ProviderHome t={t} profile={profile} providerReady={providerReady} providerVerified={providerVerified} providerRating={providerRating} documents={documents} reviews={reviews} updateProfile={updateProfile} saveProfile={saveProfile} submitDocument={submitDocument} />}
         {page === 'jobs' && <ProviderJobs t={t} requests={providerVisibleRequests} onOffer={setOfferTarget} />}
         {page === 'offers' && <ProviderOffers t={t} offers={offers} jobs={jobs} messages={messages} messageDrafts={messageDrafts} setMessageDrafts={setMessageDrafts} sendMessage={sendMessage} completeJob={completeJob} />}
@@ -1329,7 +1252,7 @@ useEffect(() => {
 
   if (role === 'admin') {
     return (
-      <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
+      <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
         <AdminHome t={t} requests={requests} offers={offers} documents={documents} reviews={reviews} setDocumentStatus={setDocumentStatus} profile={profile} setRole={setRole} />
         {toast && <Toast message={toast} />}
       </Shell>
@@ -1337,7 +1260,7 @@ useEffect(() => {
   }
 
   return (
-    <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
+    <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
       {page === 'neoHome' && (
         <BuyerNeoHome
           t={t}
@@ -1415,7 +1338,7 @@ function LandingWantedCenter() {
       <div className="mt-3 h-7 flex justify-center overflow-hidden">
         <p className="text-[17px] font-black text-[#16A34A] whitespace-nowrap overflow-hidden border-r-2 border-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards]">Arayan bulur, çalışan kazanır.</p>
       </div>
-      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">{lang === 'tr' ? 'Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.' : 'A simple, fast and trusted service marketplace for the Pi ecosystem.'}</p>
+      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
       <style>{`
         @keyframes orbitSpin {
           from { transform: rotate(0deg); }
@@ -1546,30 +1469,7 @@ function PiDomainValidationHidden() {
   );
 }
 
-
-function LanguageToggle({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }) {
-  const active = lang;
-  return (
-    <div className="flex items-center gap-1 rounded-full bg-white/80 border border-white/80 p-1 shadow-[0_10px_28px_rgba(15,23,42,0.10)] backdrop-blur-xl">
-      <button
-        onClick={() => setLang('tr')}
-        className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'tr' ? 'bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white shadow-[0_0_16px_rgba(239,68,68,0.35)]' : 'text-[#667085]'}`}
-        title="Türkçe"
-      >
-        🇹🇷 TR
-      </button>
-      <button
-        onClick={() => setLang('en')}
-        className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'en' ? 'bg-gradient-to-r from-[#16A34A] to-[#2563EB] text-white shadow-[0_0_16px_rgba(37,99,235,0.35)]' : 'text-[#667085]'}`}
-        title="English"
-      >
-        🇬🇧 EN
-      </button>
-    </div>
-  );
-}
-
-function Shell({ children, t, role, setRole, setPage, lang, setLang }: any) {
+function Shell({ children, t, role, setRole, setPage }: any) {
   return (
     <div className="h-screen bg-[radial-gradient(circle_at_top_left,#EAF8F0_0,#F7F8FA_34%,#F3F5F7_100%)] text-[#101828] overflow-hidden">
       <PiDomainValidationHidden />
@@ -1588,10 +1488,7 @@ function Shell({ children, t, role, setRole, setPage, lang, setLang }: any) {
                 <p className="text-xs text-[#15803D] font-bold mt-1">{role === 'buyer' ? t.buyer : role === 'provider' ? t.provider : t.admin}</p>
               </div>
             </button>
-            <div className="flex items-center gap-2">
-              <LanguageToggle lang={lang} setLang={setLang} />
-              <span className="text-[11px] font-bold text-[#667085] bg-white border border-[#EAECF0] px-3 py-1.5 rounded-full shadow-sm">{role === 'buyer' ? 'Hizmet Alan' : role === 'provider' ? 'Hizmet Veren' : 'Admin'}</span>
-            </div>
+            <span className="text-[11px] font-bold text-[#667085] bg-white border border-[#EAECF0] px-3 py-1.5 rounded-full shadow-sm">{role === 'buyer' ? 'Hizmet Alan' : role === 'provider' ? 'Hizmet Veren' : 'Admin'}</span>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto px-5 pb-32 pt-3">{children}</main>
@@ -1674,9 +1571,9 @@ function BuyerNeoHome({ t, query, setQuery, trendServices, sections, filteredSer
         <div className="mb-4 overflow-hidden rounded-[28px] border border-[#FDBA74]/70 bg-white shadow-[0_12px_32px_rgba(194,65,12,0.08)]">
           <div className="flex w-[300%] animate-[buyerMiniSlide_8s_ease-in-out_infinite]">
             {[
-              { title: 'Gerçek profesyonellerle çalış', text: 'Doğrulanabilir profil ve hizmet geçmişiyle güvenli seçim yap.', icon: '✅', bg: 'from-[#ECFDF3] to-white', color: '#15803D' },
-              { title: 'Teklifleri karşılaştır', text: 'Fiyat, deneyim ve belge durumuna göre en doğru kişiyi seç.', icon: '⚖️', bg: 'from-[#EFF6FF] to-white', color: '#1D4ED8' },
-              { title: 'Dakikalar içinde talep oluştur', text: 'İhtiyacını yaz, uygun hizmet verenler sana teklif versin.', icon: '📝', bg: 'from-[#FFF7ED] to-white', color: '#C2410C' },
+              { title: 'Talep oluştur', text: 'İhtiyacını yaz, uygun hizmet verenler teklif versin.', icon: '📝', bg: 'from-[#FFF7ED] to-white', color: '#C2410C' },
+              { title: 'Teklifleri karşılaştır', text: 'Fiyat, deneyim ve belge durumuna göre seç.', icon: '⚖️', bg: 'from-[#EFF6FF] to-white', color: '#1D4ED8' },
+              { title: 'Güvenli ilerle', text: 'Pi destekli, KYC hedefli hizmet pazarı.', icon: '🛡️', bg: 'from-[#ECFDF3] to-white', color: '#15803D' },
             ].map((x) => (
               <div key={x.title} className={`w-1/3 shrink-0 p-4 bg-gradient-to-br ${x.bg} flex items-center gap-3 text-left`}>
                 <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm">{x.icon}</div>
@@ -1923,22 +1820,6 @@ function ProviderHome({ t, profile, providerReady, providerVerified, providerRat
   return (
     <div className="space-y-5">
       <PremiumWantedHero role="provider" />
-
-      <div className="grid grid-cols-1 gap-3">
-        {[
-          { title: 'Hazır müşterilere ulaş', text: 'Açık talepleri gör, uygun işlere hızlı teklif ver.', icon: '🎯', tone: 'from-[#DBEAFE] to-white' },
-          { title: 'Profilini profesyonel göster', text: 'Belge, deneyim ve yorumlarla güven puanını büyüt.', icon: '⭐', tone: 'from-[#ECFDF3] to-white' },
-          { title: 'Pi destekli pazarda kazan', text: 'Web3 hizmet ekonomisinde görünür ol ve iş hacmini artır.', icon: 'π', tone: 'from-[#FFF7ED] to-white' },
-        ].map((x) => (
-          <div key={x.title} className={`rounded-[26px] bg-gradient-to-br ${x.tone} border border-white p-4 flex items-center gap-3 shadow-[0_12px_32px_rgba(15,23,42,0.07)]`}>
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm font-black text-[#12864F]">{x.icon}</div>
-            <div>
-              <h3 className="font-black text-[#101828] text-lg">{x.title}</h3>
-              <p className="text-sm text-[#667085] leading-snug">{x.text}</p>
-            </div>
-          </div>
-        ))}
-      </div>
 
       {!providerReady && <div className="rounded-3xl bg-[#FFF4EA] p-5 border border-[#FFD0A3]"><h2 className="text-[24px] leading-tight font-black text-[#101828] text-[#FF7A00]">{t.completeProvider}</h2><p className="text-[#475467] mt-1">Firma/şahıs, telefon ve meslek bilgilerini doldur.</p></div>}
       <div className="rounded-[30px] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] border border-[#EAECF0]">
