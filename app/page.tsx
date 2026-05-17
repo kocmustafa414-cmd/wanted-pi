@@ -1174,6 +1174,29 @@ useEffect(() => {
             <BottomSheet onClose={() => setLandingMenuOpen(false)}>
               <h2 className="text-[26px] leading-tight font-black text-[#101828] mb-2">Wanted.pi Menü</h2>
               <p className="text-sm text-[#667085] mb-4">Paylaş, test ödeme ve destek araçları burada. Ana ekran sade kalsın diye bu menüye aldık.</p>
+              <div className="grid grid-cols-1 gap-3 mb-4">
+                <LandingMenuAction
+                  title="Wanted ulaş"
+                  desc="Destek, iletişim ve geri bildirim alanı."
+                  emoji="📩"
+                  tone="blue"
+                  onClick={() => alert('Wanted ulaş alanı sonraki güncellemede aktif edilecek.')}
+                />
+                <LandingMenuAction
+                  title="Wanted sor"
+                  desc="Küçük yardımcı: uygulama, talep ve teklif sorularını cevaplayacak."
+                  emoji="🤖"
+                  tone="purple"
+                  onClick={() => alert('Wanted sor yardımcı alanı sonraki güncellemede aktif edilecek.')}
+                />
+                <LandingMenuAction
+                  title="Reklam ver"
+                  desc="Hizmet verenler için vitrin ve öne çıkarma alanı."
+                  emoji="📣"
+                  tone="orange"
+                  onClick={() => alert('Reklam ver alanı sonraki güncellemede aktif edilecek.')}
+                />
+              </div>
               <WantedShareCard />
               <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
               <button
@@ -1296,6 +1319,10 @@ function LandingWantedCenter() {
       <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-[#27C267]/12 blur-3xl" />
       <div className="relative w-34 h-34 rounded-full bg-gradient-to-br from-[#052E1F] via-[#0B5E37] to-[#0ABF6A] shadow-[0_0_55px_rgba(39,194,103,0.34)] flex items-center justify-center border-[6px] border-[#F4D06F]/80">
         <div className="absolute inset-[-12px] rounded-full border-2 border-[#27C267]/35 animate-[orbitSpin_8s_linear_infinite]" />
+        <div
+          className="absolute inset-[-20px] rounded-full border-[3px] animate-[orbitReverse_5.8s_linear_infinite]"
+          style={{ borderColor: '#EF4444 transparent #F59E0B #EF4444' }}
+        />
         <div className="absolute w-5 h-5 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -left-2 top-1/2" />
         <div className="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -right-1 top-[56%]" />
         <span className="relative text-[82px] leading-none font-black text-white drop-shadow-[0_7px_10px_rgba(0,0,0,0.35)]">W</span>
@@ -1304,12 +1331,26 @@ function LandingWantedCenter() {
         <h1 className="text-[46px] leading-none font-black tracking-tight text-[#0B1F17]">Wanted</h1>
         <span className="text-[46px] leading-none font-black text-[#16A34A]">.pi</span>
       </div>
-      <p className="mt-3 text-[17px] font-black text-[#101828]">Arayan bulur, çalışan kazanır.</p>
-      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
+      <div className="mt-3 h-7 flex justify-center overflow-hidden">
+        <p className="text-[17px] font-black text-[#101828] whitespace-nowrap overflow-hidden border-r-2 border-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards]">Arayan bulur, çalışan kazanır.</p>
+      </div>
+      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
       <style>{`
         @keyframes orbitSpin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        @keyframes orbitReverse {
+          from { transform: rotate(360deg); }
+          to { transform: rotate(0deg); }
+        }
+        @keyframes typeOnce {
+          from { width: 0; }
+          to { width: 270px; }
+        }
+        @keyframes fadeInText {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
@@ -1344,6 +1385,27 @@ function LandingMiniTrust({ label }: any) {
       <div className="text-[#16A34A] font-black text-lg">✓</div>
       <div className="text-[11px] font-black text-[#475467] leading-tight">{label}</div>
     </div>
+  );
+}
+
+function LandingMenuAction({ title, desc, emoji, tone, onClick }: any) {
+  const tones: any = {
+    blue: 'from-[#EFF6FF] to-white border-[#93C5FD] text-[#1D4ED8]',
+    purple: 'from-[#F5F3FF] to-white border-[#C4B5FD] text-[#6D28D9]',
+    orange: 'from-[#FFF7ED] to-white border-[#FDBA74] text-[#C2410C]',
+  };
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full rounded-3xl border bg-gradient-to-br ${tones[tone] || tones.blue} p-4 flex items-center gap-3 text-left shadow-sm active:scale-[0.99]`}
+    >
+      <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm">{emoji}</div>
+      <div className="flex-1">
+        <h3 className="text-lg font-black text-[#101828]">{title}</h3>
+        <p className="text-xs text-[#667085] mt-1 leading-snug">{desc}</p>
+      </div>
+      <ChevronRight size={20} className="text-[#667085]" />
+    </button>
   );
 }
 
@@ -1989,7 +2051,7 @@ function EscrowMiniPanel({ job, escrows, mode, updateEscrowStatus }: any) {
 function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
   const menu = [
     { title: t.myProfile, desc: 'Profil resmini, adını, telefonunu ve konumunu düzenle.', icon: '👤', action: () => setPage('profile') },
-    { title: t.passwords, desc: 'Şifre ve güvenlik tercihlerini yönet.', icon: '🔐', action: () => alert('Şifreler demo alanı') },
+    { title: 'Şifreler', desc: 'Şifre ve güvenlik tercihlerini yönet.', icon: '🔐', action: () => alert('Şifreler demo alanı') },
     { title: t.paymentOptions, desc: 'Pi Wallet, IBAN ve ödeme tercihlerini yönet.', icon: '💳', action: () => setPage('profile') },
     { title: t.inviteFriend, desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', action: shareWantedApp },
     { title: t.rateApp, desc: 'Uygulama deneyimini değerlendir.', icon: '⭐', action: () => alert('Uygulamayı değerlendir demo') },
@@ -2376,7 +2438,7 @@ function BottomNav({ role, page, setPage, t }: any) {
         { key: 'neoHome', label: t.buyer, icon: Search },
         { key: 'jobs', label: t.jobs, icon: Briefcase },
         { key: 'offers', label: t.offers, icon: FileText },
-        { key: 'settings', label: t.buyerSettings, icon: User },
+        { key: 'settings', label: 'Ayarlar', icon: User },
       ]
     : [
         { key: 'providerHome', label: 'Panel', icon: Search },
@@ -2425,6 +2487,7 @@ function PremiumSplashHero({ t }: any) {
         <div className="absolute inset-[10px] rounded-full border-[5px] border-[#F4D06F]/85 shadow-[inset_0_0_20px_rgba(255,255,255,0.18)]" />
         <div className="absolute inset-[-8px] rounded-full border-2 border-[#27C267]/45 animate-[orbitSpin_7s_linear_infinite]" />
         <div className="absolute inset-[-22px] rounded-full border border-[#F4D06F]/35 animate-[orbitReverse_10s_linear_infinite]" />
+        <div className="absolute inset-[-30px] rounded-full border-[3px] animate-[orbitReverse_5.8s_linear_infinite]" style={{ borderColor: '#EF4444 transparent #F59E0B #EF4444' }} />
         <div className="absolute w-[118%] h-8 rounded-full border border-[#8CFFBF]/60 rotate-[-10deg] shadow-[0_0_18px_rgba(39,194,103,0.45)] animate-[orbitSpin_9s_linear_infinite]" />
         <div className="absolute w-5 h-5 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] left-2 top-[52%]" />
         <div className="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] right-5 top-[56%]" />
@@ -2439,7 +2502,7 @@ function PremiumSplashHero({ t }: any) {
       </div>
 
       <div className="h-8 mt-3 overflow-hidden flex justify-center">
-        <p className="text-xl font-black text-[#101828] text-[#16A34A] animate-[typePulse_3.8s_steps(28)_infinite] whitespace-nowrap border-r-2 border-[#16A34A]">
+        <p className="text-xl font-black text-[#101828] text-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards] whitespace-nowrap border-r-2 border-[#16A34A]">
           Arayan bulur, çalışan kazanır.
         </p>
       </div>
@@ -2477,11 +2540,9 @@ function PremiumSplashHero({ t }: any) {
           0%, 100% { filter: brightness(1); transform: scale(1); }
           50% { filter: brightness(1.18); transform: scale(1.025); }
         }
-        @keyframes typePulse {
-          0% { width: 0; opacity: 1; }
-          45% { width: 285px; opacity: 1; }
-          72% { width: 285px; opacity: 1; }
-          100% { width: 0; opacity: .55; }
+        @keyframes typeOnce {
+          from { width: 0; opacity: 1; }
+          to { width: 285px; opacity: 1; }
         }
         @keyframes slideDeck {
           0%, 18% { transform: translateY(0); }
