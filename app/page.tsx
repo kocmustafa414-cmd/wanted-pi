@@ -280,7 +280,7 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 27.6 — Clean Open + Pi Test Payment',
+  version: 'Wanted.pi Varan 24.2 — Language + Hero Polish',
 };
 
 const IMG = {
@@ -1143,7 +1143,10 @@ useEffect(() => {
             >
               ☰
             </button>
-            <div className="px-4 py-2 rounded-full bg-white/80 border border-white shadow-sm text-xs font-black text-[#12864F]">Pi + Web3 hizmet pazarı</div>
+            <div className="flex items-center gap-2">
+              <LanguageToggle />
+              <div className="px-3 py-2 rounded-full bg-white/80 border border-white shadow-sm text-[11px] font-black text-[#12864F]">Pi + Web3</div>
+            </div>
           </div>
 
           <LandingRoleButton
@@ -1469,6 +1472,29 @@ function PiDomainValidationHidden() {
   );
 }
 
+
+function LanguageToggle() {
+  const [active, setActive] = useState<'tr' | 'en'>('tr');
+  return (
+    <div className="flex items-center gap-1 rounded-full bg-white/80 border border-white/80 p-1 shadow-[0_10px_28px_rgba(15,23,42,0.10)] backdrop-blur-xl">
+      <button
+        onClick={() => setActive('tr')}
+        className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'tr' ? 'bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white shadow-[0_0_16px_rgba(239,68,68,0.35)]' : 'text-[#667085]'}`}
+        title="Türkçe"
+      >
+        🇹🇷 TR
+      </button>
+      <button
+        onClick={() => setActive('en')}
+        className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'en' ? 'bg-gradient-to-r from-[#16A34A] to-[#2563EB] text-white shadow-[0_0_16px_rgba(37,99,235,0.35)]' : 'text-[#667085]'}`}
+        title="English"
+      >
+        🇬🇧 EN
+      </button>
+    </div>
+  );
+}
+
 function Shell({ children, t, role, setRole, setPage }: any) {
   return (
     <div className="h-screen bg-[radial-gradient(circle_at_top_left,#EAF8F0_0,#F7F8FA_34%,#F3F5F7_100%)] text-[#101828] overflow-hidden">
@@ -1488,7 +1514,10 @@ function Shell({ children, t, role, setRole, setPage }: any) {
                 <p className="text-xs text-[#15803D] font-bold mt-1">{role === 'buyer' ? t.buyer : role === 'provider' ? t.provider : t.admin}</p>
               </div>
             </button>
-            <span className="text-[11px] font-bold text-[#667085] bg-white border border-[#EAECF0] px-3 py-1.5 rounded-full shadow-sm">{role === 'buyer' ? 'Hizmet Alan' : role === 'provider' ? 'Hizmet Veren' : 'Admin'}</span>
+            <div className="flex items-center gap-2">
+              <LanguageToggle />
+              <span className="text-[11px] font-bold text-[#667085] bg-white border border-[#EAECF0] px-3 py-1.5 rounded-full shadow-sm">{role === 'buyer' ? 'Hizmet Alan' : role === 'provider' ? 'Hizmet Veren' : 'Admin'}</span>
+            </div>
           </div>
         </header>
         <main className="flex-1 overflow-y-auto px-5 pb-32 pt-3">{children}</main>
@@ -1571,9 +1600,9 @@ function BuyerNeoHome({ t, query, setQuery, trendServices, sections, filteredSer
         <div className="mb-4 overflow-hidden rounded-[28px] border border-[#FDBA74]/70 bg-white shadow-[0_12px_32px_rgba(194,65,12,0.08)]">
           <div className="flex w-[300%] animate-[buyerMiniSlide_8s_ease-in-out_infinite]">
             {[
-              { title: 'Talep oluştur', text: 'İhtiyacını yaz, uygun hizmet verenler teklif versin.', icon: '📝', bg: 'from-[#FFF7ED] to-white', color: '#C2410C' },
-              { title: 'Teklifleri karşılaştır', text: 'Fiyat, deneyim ve belge durumuna göre seç.', icon: '⚖️', bg: 'from-[#EFF6FF] to-white', color: '#1D4ED8' },
-              { title: 'Güvenli ilerle', text: 'Pi destekli, KYC hedefli hizmet pazarı.', icon: '🛡️', bg: 'from-[#ECFDF3] to-white', color: '#15803D' },
+              { title: 'Gerçek profesyonellerle çalış', text: 'Doğrulanabilir profil ve hizmet geçmişiyle güvenli seçim yap.', icon: '✅', bg: 'from-[#ECFDF3] to-white', color: '#15803D' },
+              { title: 'Teklifleri karşılaştır', text: 'Fiyat, deneyim ve belge durumuna göre en doğru kişiyi seç.', icon: '⚖️', bg: 'from-[#EFF6FF] to-white', color: '#1D4ED8' },
+              { title: 'Dakikalar içinde talep oluştur', text: 'İhtiyacını yaz, uygun hizmet verenler sana teklif versin.', icon: '📝', bg: 'from-[#FFF7ED] to-white', color: '#C2410C' },
             ].map((x) => (
               <div key={x.title} className={`w-1/3 shrink-0 p-4 bg-gradient-to-br ${x.bg} flex items-center gap-3 text-left`}>
                 <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm">{x.icon}</div>
@@ -1820,6 +1849,22 @@ function ProviderHome({ t, profile, providerReady, providerVerified, providerRat
   return (
     <div className="space-y-5">
       <PremiumWantedHero role="provider" />
+
+      <div className="grid grid-cols-1 gap-3">
+        {[
+          { title: 'Hazır müşterilere ulaş', text: 'Açık talepleri gör, uygun işlere hızlı teklif ver.', icon: '🎯', tone: 'from-[#DBEAFE] to-white' },
+          { title: 'Profilini profesyonel göster', text: 'Belge, deneyim ve yorumlarla güven puanını büyüt.', icon: '⭐', tone: 'from-[#ECFDF3] to-white' },
+          { title: 'Pi destekli pazarda kazan', text: 'Web3 hizmet ekonomisinde görünür ol ve iş hacmini artır.', icon: 'π', tone: 'from-[#FFF7ED] to-white' },
+        ].map((x) => (
+          <div key={x.title} className={`rounded-[26px] bg-gradient-to-br ${x.tone} border border-white p-4 flex items-center gap-3 shadow-[0_12px_32px_rgba(15,23,42,0.07)]`}>
+            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl shadow-sm font-black text-[#12864F]">{x.icon}</div>
+            <div>
+              <h3 className="font-black text-[#101828] text-lg">{x.title}</h3>
+              <p className="text-sm text-[#667085] leading-snug">{x.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {!providerReady && <div className="rounded-3xl bg-[#FFF4EA] p-5 border border-[#FFD0A3]"><h2 className="text-[24px] leading-tight font-black text-[#101828] text-[#FF7A00]">{t.completeProvider}</h2><p className="text-[#475467] mt-1">Firma/şahıs, telefon ve meslek bilgilerini doldur.</p></div>}
       <div className="rounded-[30px] bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] border border-[#EAECF0]">
