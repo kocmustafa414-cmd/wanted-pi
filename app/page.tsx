@@ -571,6 +571,7 @@ export default function AppPage() {
   const [offerTarget, setOfferTarget] = useState<RequestItem | null>(null);
   const [offerDetail, setOfferDetail] = useState<OfferItem | null>(null);
   const [adminPassOpen, setAdminPassOpen] = useState(false);
+  const [landingMenuOpen, setLandingMenuOpen] = useState(false);
   const [adminPass, setAdminPass] = useState('');
   const [toast, setToast] = useState('');
   const [piPaymentStatus, setPiPaymentStatus] = useState('');
@@ -1131,18 +1132,58 @@ useEffect(() => {
 
   if (!role) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] text-[#141414] p-6">
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,#EAF8F0_0,#F8FAFC_42%,#EEF2F6_100%)] text-[#141414] px-4 py-4 overflow-hidden">
         <PiDomainValidationHidden />
-        <div className="max-w-md mx-auto pt-6">
-          <PremiumSplashHero t={t} />
+        <div className="max-w-md mx-auto min-h-[calc(100vh-32px)] flex flex-col relative">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={() => setLandingMenuOpen(true)}
+              className="w-12 h-12 rounded-2xl bg-white/90 border border-white shadow-[0_12px_30px_rgba(15,23,42,0.10)] flex items-center justify-center text-2xl font-black active:scale-[0.98]"
+              aria-label="Menü"
+            >
+              ☰
+            </button>
+            <div className="px-4 py-2 rounded-full bg-white/80 border border-white shadow-sm text-xs font-black text-[#12864F]">Pi + Web3 hizmet pazarı</div>
+          </div>
 
-          <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
-          <WantedShareCard />
+          <LandingRoleButton
+            title="Hizmet Al"
+            desc="Usta, uzman veya çalışan bul. Talep oluştur, teklifleri karşılaştır."
+            icon={<Search size={28} />}
+            tone="buyer"
+            onClick={() => { setRole('buyer'); setPage('neoHome'); }}
+          />
 
-          <h2 className="text-[24px] leading-tight font-black text-[#101828] mb-4">{t.roleSelect}</h2>
-          <RoleCard icon={<Search />} title={t.buyer} desc={t.buyerDesc} color="orange" onClick={() => { setRole('buyer'); setPage('neoHome'); }} />
-          <RoleCard icon={<Building2 />} title={t.provider} desc={t.providerDesc} color="green" onClick={() => { setRole('provider'); setPage('providerHome'); }} />
-          
+          <LandingWantedCenter />
+
+          <LandingRoleButton
+            title="Hizmet Ver"
+            desc="Profilini oluştur, işlere teklif ver, Pi destekli pazarda görünür ol."
+            icon={<Building2 size={28} />}
+            tone="provider"
+            onClick={() => { setRole('provider'); setPage('providerHome'); }}
+          />
+
+          <div className="grid grid-cols-3 gap-2 mt-3">
+            <LandingMiniTrust label="Pi uyumlu" />
+            <LandingMiniTrust label="KYC hedefli" />
+            <LandingMiniTrust label="Güvenli pazar" />
+          </div>
+
+          {landingMenuOpen && (
+            <BottomSheet onClose={() => setLandingMenuOpen(false)}>
+              <h2 className="text-[26px] leading-tight font-black text-[#101828] mb-2">Wanted.pi Menü</h2>
+              <p className="text-sm text-[#667085] mb-4">Paylaş, test ödeme ve destek araçları burada. Ana ekran sade kalsın diye bu menüye aldık.</p>
+              <WantedShareCard />
+              <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
+              <button
+                onClick={() => { setAdminPassOpen(true); setLandingMenuOpen(false); }}
+                className="w-full mt-1 py-4 rounded-2xl bg-[#101828] text-white font-black"
+              >
+                Yönetici Girişi
+              </button>
+            </BottomSheet>
+          )}
 
           {adminPassOpen && (
             <BottomSheet onClose={() => setAdminPassOpen(false)}>
@@ -1247,6 +1288,64 @@ useEffect(() => {
   );
 }
 
+
+
+function LandingWantedCenter() {
+  return (
+    <div className="flex-1 min-h-[260px] rounded-[36px] bg-gradient-to-br from-white via-[#F8FFFB] to-[#EAF8F0] border border-white shadow-[0_24px_70px_rgba(15,23,42,0.10)] my-3 p-5 flex flex-col items-center justify-center text-center relative overflow-hidden">
+      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-[#27C267]/12 blur-3xl" />
+      <div className="relative w-34 h-34 rounded-full bg-gradient-to-br from-[#052E1F] via-[#0B5E37] to-[#0ABF6A] shadow-[0_0_55px_rgba(39,194,103,0.34)] flex items-center justify-center border-[6px] border-[#F4D06F]/80">
+        <div className="absolute inset-[-12px] rounded-full border-2 border-[#27C267]/35 animate-[orbitSpin_8s_linear_infinite]" />
+        <div className="absolute w-5 h-5 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -left-2 top-1/2" />
+        <div className="absolute w-4 h-4 rounded-full bg-white shadow-[0_0_18px_rgba(39,194,103,0.9)] -right-1 top-[56%]" />
+        <span className="relative text-[82px] leading-none font-black text-white drop-shadow-[0_7px_10px_rgba(0,0,0,0.35)]">W</span>
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-1">
+        <h1 className="text-[46px] leading-none font-black tracking-tight text-[#0B1F17]">Wanted</h1>
+        <span className="text-[46px] leading-none font-black text-[#16A34A]">.pi</span>
+      </div>
+      <p className="mt-3 text-[17px] font-black text-[#101828]">Arayan bulur, çalışan kazanır.</p>
+      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
+      <style>{`
+        @keyframes orbitSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function LandingRoleButton({ title, desc, icon, tone, onClick }: any) {
+  const style = tone === 'buyer'
+    ? 'bg-gradient-to-br from-[#FFF7ED] to-white border-[#FDBA74] text-[#C2410C]'
+    : 'bg-gradient-to-br from-[#ECFDF3] to-white border-[#86EFAC] text-[#0B5E37]';
+
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full rounded-[30px] border ${style} p-4 flex items-center gap-4 text-left shadow-[0_18px_45px_rgba(15,23,42,0.08)] active:scale-[0.99]`}
+    >
+      <div className="w-16 h-16 rounded-3xl bg-white flex items-center justify-center shadow-sm text-[#12864F]">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h3 className="text-[26px] leading-tight font-black text-[#101828]">{title}</h3>
+        <p className="text-sm text-[#667085] mt-1 leading-snug">{desc}</p>
+      </div>
+      <div className="w-10 h-10 rounded-full bg-white/90 flex items-center justify-center text-[#475467]"><ChevronRight size={22} /></div>
+    </button>
+  );
+}
+
+function LandingMiniTrust({ label }: any) {
+  return (
+    <div className="rounded-2xl bg-white/85 border border-white px-2 py-3 text-center shadow-sm">
+      <div className="text-[#16A34A] font-black text-lg">✓</div>
+      <div className="text-[11px] font-black text-[#475467] leading-tight">{label}</div>
+    </div>
+  );
+}
 
 function WantedShareCard() {
   return (
