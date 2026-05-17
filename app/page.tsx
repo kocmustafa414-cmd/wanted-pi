@@ -165,6 +165,52 @@ const OFFER_FEE_PI = 0.314;
 const DEMO_PI_TL = 35;
 const OFFER_FEE_TL = Number((OFFER_FEE_PI * DEMO_PI_TL).toFixed(2));
 
+
+const WANTED_APP_URL = 'https://wanted-pi-chi.vercel.app';
+const WANTED_SHARE_TEXT = `🚀 Wanted.pi aktif!
+
+Pi Browser ile aç:
+${WANTED_APP_URL}
+
+Destek için:
+✅ Pi Browser’dan aç
+✅ Giriş yap
+✅ Uygulamada gezin
+✅ Pi test ödeme ekranına kadar ilerle
+
+wanted.pi domain claim desteği için teşekkürler 💜`;
+
+async function shareWantedApp() {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      await navigator.share({
+        title: 'Wanted.pi',
+        text: WANTED_SHARE_TEXT,
+        url: WANTED_APP_URL,
+      });
+      return;
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(WANTED_SHARE_TEXT);
+      alert('Wanted.pi davet mesajı kopyalandı. Telegram veya WhatsApp grubuna yapıştırabilirsin.');
+      return;
+    }
+
+    if (typeof window !== 'undefined') {
+      window.prompt('Bu mesajı kopyalayıp paylaş:', WANTED_SHARE_TEXT);
+    }
+  } catch (error) {
+    console.log('Share failed:', error);
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(WANTED_SHARE_TEXT);
+      alert('Paylaşım açılmadı ama davet mesajı kopyalandı. Telegram veya WhatsApp grubuna yapıştırabilirsin.');
+    } else if (typeof window !== 'undefined') {
+      window.prompt('Bu mesajı kopyalayıp paylaş:', WANTED_SHARE_TEXT);
+    }
+  }
+}
+
 const t = {
   app: 'Wanted.pi',
   slogan: 'Arayan bulur, çalışan kazanır.',
@@ -1091,6 +1137,7 @@ useEffect(() => {
           <PremiumSplashHero t={t} />
 
           <PiTestPaymentCard onClick={startPiTestPayment} status={piPaymentStatus} />
+          <WantedShareCard />
 
           <h2 className="text-[24px] leading-tight font-black text-[#101828] mb-4">{t.roleSelect}</h2>
           <RoleCard icon={<Search />} title={t.buyer} desc={t.buyerDesc} color="orange" onClick={() => { setRole('buyer'); setPage('neoHome'); }} />
@@ -1197,6 +1244,27 @@ useEffect(() => {
       <BottomNav role={role} page={page} setPage={setPage} t={t} />
       {toast && <Toast message={toast} />}
     </Shell>
+  );
+}
+
+
+function WantedShareCard() {
+  return (
+    <div className="mb-5 rounded-[28px] bg-[#F0FDF4] border border-[#BBF7D0] shadow-[0_12px_34px_rgba(22,163,74,0.08)] p-4">
+      <div className="flex items-start gap-3">
+        <div className="w-12 h-12 rounded-2xl bg-[#16A34A] text-white flex items-center justify-center font-black">↗</div>
+        <div className="flex-1">
+          <h3 className="font-black text-[#101828] text-lg">Wanted.pi paylaş</h3>
+          <p className="text-sm text-[#667085] mt-1">Telegram, WhatsApp veya Pi Browser destek mesajını tek dokunuşla paylaş.</p>
+        </div>
+      </div>
+      <button
+        onClick={shareWantedApp}
+        className="w-full mt-4 py-4 rounded-2xl bg-[#16A34A] text-white font-black active:scale-[0.99]"
+      >
+        Davet Mesajını Paylaş / Kopyala
+      </button>
+    </div>
   );
 }
 
@@ -1824,7 +1892,7 @@ function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
     { title: t.myProfile, desc: 'Profil resmini, adını, telefonunu ve konumunu düzenle.', icon: '👤', action: () => setPage('profile') },
     { title: t.passwords, desc: 'Şifre ve güvenlik tercihlerini yönet.', icon: '🔐', action: () => alert('Şifreler demo alanı') },
     { title: t.paymentOptions, desc: 'Pi Wallet, IBAN ve ödeme tercihlerini yönet.', icon: '💳', action: () => setPage('profile') },
-    { title: t.inviteFriend, desc: 'Wanted.pi davet bağlantını paylaş.', icon: '🔗', action: () => alert('Arkadaşına tavsiye et demo') },
+    { title: t.inviteFriend, desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', action: shareWantedApp },
     { title: t.rateApp, desc: 'Uygulama deneyimini değerlendir.', icon: '⭐', action: () => alert('Uygulamayı değerlendir demo') },
     { title: t.supportCenter, desc: 'Yardım ve destek taleplerini oluştur.', icon: '❔', action: () => alert('Destek merkezi demo') },
     { title: t.dataPrivacy, desc: 'Veri izinleri ve gizlilik ayarları.', icon: '🔒', action: () => alert('Veri ve gizlilik demo') },
@@ -1899,7 +1967,7 @@ function ProviderSettingsPage({ t, profile, setPage, setRole }: any) {
     { title: 'Hesap ayarlarım', desc: 'Şifre, bildirim ve güvenlik tercihleri.', icon: '⚙️', action: () => alert('Hesap ayarları demo alanı') },
     { title: 'Müşteri yorumları', desc: 'Müşterilerin senin hakkında yazdıkları.', icon: '⭐', action: () => alert('Müşteri yorumları demo alanı') },
     { title: 'Pazarlama profilim', desc: 'Rozet, öne çıkarma ve profesyonel görünürlük.', icon: '🚀', action: () => alert('Pazarlama profili demo alanı') },
-    { title: 'Tavsiye et', desc: 'Wanted.pi hizmet veren davet bağlantını paylaş.', icon: '🔗', action: () => alert('Tavsiye et demo alanı') },
+    { title: 'Tavsiye et', desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', action: shareWantedApp },
     { title: 'Wanted destek', desc: 'Wanted ekibinden destek al.', icon: '❔', action: () => alert('Wanted destek demo alanı') },
     { title: 'Veri ve gizlilik', desc: 'Veri izinleri ve gizlilik ayarları.', icon: '🔒', action: () => alert('Veri ve gizlilik demo alanı') },
   ];
