@@ -2095,14 +2095,14 @@ function EscrowMiniPanel({ job, escrows, mode, updateEscrowStatus }: any) {
 
 function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
   const menu = [
-    { title: t.myProfile, desc: 'Profil resmini, adını, telefonunu ve konumunu düzenle.', icon: '👤', action: () => setPage('profile') },
-    { title: 'Şifreler', desc: 'Şifre ve güvenlik tercihlerini yönet.', icon: '🔐', action: () => alert('Şifreler demo alanı') },
-    { title: t.paymentOptions, desc: 'Pi Wallet, IBAN ve ödeme tercihlerini yönet.', icon: '💳', action: () => setPage('profile') },
-    { title: t.inviteFriend, desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', action: shareWantedApp },
-    { title: t.rateApp, desc: 'Uygulama deneyimini değerlendir.', icon: '⭐', action: () => alert('Uygulamayı değerlendir demo') },
-    { title: t.supportCenter, desc: 'Yardım ve destek taleplerini oluştur.', icon: '❔', action: () => alert('Destek merkezi demo') },
-    { title: t.dataPrivacy, desc: 'Veri izinleri ve gizlilik ayarları.', icon: '🔒', action: () => alert('Veri ve gizlilik demo') },
-    { title: t.complaintSuggestion, desc: 'Şikayetini veya önerini Wanted ekibine ilet.', icon: '📣', action: () => alert('Şikayet ve öneri demo') },
+    { title: t.myProfile, desc: 'Profil resmini, adını, telefonunu ve konumunu düzenle.', icon: '👤', tone: '#8B5CF6', action: () => setPage('profile') },
+    { title: 'Şifreler', desc: 'Şifre ve güvenlik tercihlerini yönet.', icon: '🔐', tone: '#7C3AED', action: () => alert('Şifreler demo alanı') },
+    { title: 'Ödemeler', desc: 'Pi Wallet, IBAN ve ödeme tercihlerini yönet.', icon: '💳', tone: '#F59E0B', action: () => setPage('profile') },
+    { title: t.inviteFriend, desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', tone: '#06B6D4', action: shareWantedApp },
+    { title: t.rateApp, desc: 'Uygulama deneyimini değerlendir.', icon: '⭐', tone: '#EC4899', action: () => alert('Uygulamayı değerlendir demo') },
+    { title: 'Wanted ulaş', desc: 'Destek, iletişim ve geri bildirim alanı.', icon: '✉️', tone: '#3B82F6', action: () => alert('Wanted ulaş alanı sonraki güncellemede aktif edilecek.') },
+    { title: 'Wanted sor', desc: 'Wanted yardımcı ve sık sorulan sorular.', icon: '❓', tone: '#F97316', action: () => alert('Wanted sor alanı sonraki güncellemede aktif edilecek.') },
+    { title: 'Reklam ver', desc: 'Hizmetini daha çok kişiye ulaştır.', icon: '📣', tone: '#F43F5E', action: () => alert('Reklam ver alanı sonraki güncellemede aktif edilecek.') },
   ];
 
   return (
@@ -2129,20 +2129,20 @@ function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
         `}</style>
       </div>
 
-      <div className="rounded-[30px] bg-white shadow-[0_14px_40px_rgba(15,23,42,0.06)] border border-[#EAECF0] overflow-hidden border border-gray-100">
+      <div className="rounded-[34px] bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#042F2E] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.28)] border border-white/10 space-y-3">
         {menu.map((item, idx) => (
           <button
             key={item.title}
             onClick={item.action}
-            className="w-full p-4 text-left flex items-center gap-3 border-b last:border-b-0 hover:bg-[#F8FAFC] transition-all animate-[buyerSlide_.35s_ease_forwards]"
+            className="w-full p-4 text-left flex items-center gap-3 rounded-[24px] bg-white/10 border border-white/10 hover:bg-white/15 transition-all animate-[buyerSlide_.35s_ease_forwards] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]"
             style={{ animationDelay: `${idx * 35}ms` }}
           >
-            <div className="w-11 h-11 rounded-2xl bg-[#F8FAFC] flex items-center justify-center text-xl">{item.icon}</div>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl text-white shadow-[0_0_24px_rgba(255,255,255,0.18)]" style={{ background: item.tone }}>{item.icon}</div>
             <div className="flex-1">
-              <h3 className="font-black text-lg">{item.title}</h3>
-              <p className="text-sm text-[#667085]">{item.desc}</p>
+              <h3 className="font-black text-lg text-white">{item.title}</h3>
+              <p className="text-sm text-white/65">{item.desc}</p>
             </div>
-            <ChevronRight />
+            <ChevronRight className="text-white/70" />
           </button>
         ))}
       </div>
@@ -2166,16 +2166,16 @@ function BuyerSettingsPage({ t, profile, setPage, setRole }: any) {
 
 function ProviderSettingsPage({ t, profile, setPage, setRole }: any) {
   const menu = [
-    { title: 'Profilim', desc: 'Ad, telefon, firma ve uzmanlık bilgilerini düzenle.', icon: '👤', action: () => setPage('profile') },
-    { title: 'Hizmet ekle', desc: 'Yeni meslek/branş ekle, belge yükle ve aktif et.', icon: '➕', action: () => setPage('serviceAdd') },
-    { title: 'Hizmetlerim', desc: 'Aktif hizmetlerini ve belge durumlarını görüntüle.', icon: '💼', action: () => setPage('serviceAdd') },
-    { title: 'Cüzdanım', desc: 'Pi Wallet, IBAN ve ödeme alma tercihleri.', icon: '💳', action: () => setPage('profile') },
-    { title: 'Hesap ayarlarım', desc: 'Şifre, bildirim ve güvenlik tercihleri.', icon: '⚙️', action: () => alert('Hesap ayarları demo alanı') },
-    { title: 'Müşteri yorumları', desc: 'Müşterilerin senin hakkında yazdıkları.', icon: '⭐', action: () => alert('Müşteri yorumları demo alanı') },
-    { title: 'Pazarlama profilim', desc: 'Rozet, öne çıkarma ve profesyonel görünürlük.', icon: '🚀', action: () => alert('Pazarlama profili demo alanı') },
-    { title: 'Tavsiye et', desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', action: shareWantedApp },
-    { title: 'Wanted destek', desc: 'Wanted ekibinden destek al.', icon: '❔', action: () => alert('Wanted destek demo alanı') },
-    { title: 'Veri ve gizlilik', desc: 'Veri izinleri ve gizlilik ayarları.', icon: '🔒', action: () => alert('Veri ve gizlilik demo alanı') },
+    { title: 'Profilim', desc: 'Ad, telefon, firma ve uzmanlık bilgilerini düzenle.', icon: '👤', tone: '#8B5CF6', action: () => setPage('profile') },
+    { title: 'Hizmet ekle', desc: 'Yeni meslek/branş ekle, belge yükle ve aktif et.', icon: '➕', tone: '#22C55E', action: () => setPage('serviceAdd') },
+    { title: 'Hizmetlerim', desc: 'Aktif hizmetlerini ve belge durumlarını görüntüle.', icon: '💼', tone: '#10B981', action: () => setPage('serviceAdd') },
+    { title: 'Ödemeler', desc: 'Pi Wallet, IBAN ve ödeme alma tercihleri.', icon: '💳', tone: '#F59E0B', action: () => setPage('profile') },
+    { title: 'Şifreler', desc: 'Şifre, bildirim ve güvenlik tercihleri.', icon: '🔐', tone: '#7C3AED', action: () => alert('Şifreler demo alanı') },
+    { title: 'Müşteri yorumları', desc: 'Müşterilerin senin hakkında yazdıkları.', icon: '⭐', tone: '#EC4899', action: () => alert('Müşteri yorumları demo alanı') },
+    { title: 'Pazarlama profilim', desc: 'Rozet, öne çıkarma ve profesyonel görünürlük.', icon: '🚀', tone: '#F97316', action: () => alert('Pazarlama profili demo alanı') },
+    { title: 'Arkadaşına tavsiye et', desc: 'Pi Browser, Telegram veya WhatsApp ile davet mesajını paylaş.', icon: '🔗', tone: '#06B6D4', action: shareWantedApp },
+    { title: 'Wanted ulaş', desc: 'Wanted ekibinden destek al.', icon: '✉️', tone: '#3B82F6', action: () => alert('Wanted ulaş demo alanı') },
+    { title: 'Wanted sor', desc: 'Yardımcı ve sık sorulan sorular.', icon: '❓', tone: '#F43F5E', action: () => alert('Wanted sor demo alanı') },
   ];
 
   return (
@@ -2205,22 +2205,22 @@ function ProviderSettingsPage({ t, profile, setPage, setRole }: any) {
         `}</style>
       </div>
 
-      <div className="rounded-[32px] bg-white shadow-sm overflow-hidden border border-gray-100">
+      <div className="rounded-[34px] bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#042F2E] p-4 shadow-[0_24px_70px_rgba(15,23,42,0.28)] border border-white/10 space-y-3">
         {menu.map((item, idx) => (
           <button
             key={item.title}
             onClick={item.action}
-            className="w-full p-4 text-left flex items-center gap-3 border-b last:border-b-0 hover:bg-[#F8FAFC] transition-all animate-[providerSlide_.35s_ease_forwards]"
+            className="w-full p-4 text-left flex items-center gap-3 rounded-[24px] bg-white/10 border border-white/10 hover:bg-white/15 transition-all animate-[providerSlide_.35s_ease_forwards] shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]"
             style={{ animationDelay: `${idx * 45}ms` }}
           >
-            <div className="w-12 h-12 rounded-2xl bg-[#F8FAFC] flex items-center justify-center text-2xl">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl text-white shadow-[0_0_24px_rgba(255,255,255,0.18)]" style={{ background: item.tone }}>
               {item.icon}
             </div>
             <div className="flex-1">
-              <h3 className="font-black text-xl text-[#111]">{item.title}</h3>
-              <p className="text-sm text-[#667085] mt-1">{item.desc}</p>
+              <h3 className="font-black text-xl text-white">{item.title}</h3>
+              <p className="text-sm text-white/65 mt-1">{item.desc}</p>
             </div>
-            <ChevronRight className="text-[#667085]" />
+            <ChevronRight className="text-white/70" />
           </button>
         ))}
       </div>
@@ -2494,7 +2494,7 @@ function BottomNav({ role, page, setPage, t }: any) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-4 pointer-events-none">
-      <div className="max-w-md mx-auto grid grid-cols-4 gap-1 rounded-[28px] bg-white/92 backdrop-blur-xl border border-white shadow-[0_18px_45px_rgba(15,23,42,0.16)] p-2 pointer-events-auto">
+      <div className="max-w-md mx-auto grid grid-cols-4 gap-1 rounded-[28px] bg-[#0F172A]/92 backdrop-blur-xl border border-white/10 shadow-[0_18px_45px_rgba(15,23,42,0.35)] p-2 pointer-events-auto">
         {items.map((item) => {
           const Icon = item.icon;
           const active = page === item.key;
@@ -2502,7 +2502,7 @@ function BottomNav({ role, page, setPage, t }: any) {
             <button
               key={item.key}
               onClick={() => setPage(item.key)}
-              className={`py-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all ${active ? 'bg-[#EAF8F0] text-[#12864F] shadow-inner' : 'text-[#667085] hover:bg-[#F8FAFC]'}`}
+              className={`py-2.5 rounded-2xl flex flex-col items-center gap-1 transition-all ${active ? 'bg-[#27C267] text-white shadow-[0_0_18px_rgba(39,194,103,0.45)]' : 'text-white/55 hover:bg-white/10 hover:text-white'}`}
             >
               <Icon size={22} strokeWidth={active ? 2.8 : 2.2} />
               <span className="text-[11px] font-black leading-none">{item.label}</span>
