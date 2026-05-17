@@ -280,7 +280,78 @@ const t = {
   dataPrivacy: 'Veri ve gizlilik',
   complaintSuggestion: 'Şikayet ve öneri',
   logout: 'Çıkış Yap',
-  version: 'Wanted.pi Varan 24.2 — Language + Hero Polish',
+  version: 'Wanted.pi Varan 24.3 — Working Language Switch',
+};
+
+
+const translations: Record<Lang, typeof t> = {
+  tr: t,
+  en: {
+    ...t,
+    slogan: 'Those who search find, those who work earn.',
+    buyer: 'Find Service',
+    provider: 'Offer Service',
+    roleSelect: 'How would you like to continue?',
+    buyerDesc: 'Find a service, expert or worker',
+    providerDesc: 'Offer services, send quotes, get jobs',
+    search: 'What service do you need?',
+    trends: 'Trending Services',
+    jobs: 'My Jobs',
+    openJobs: 'Open Request Market',
+    offers: 'Offers',
+    notifications: 'Notifications',
+    profile: 'Profile',
+    myServices: 'My Services',
+    createRequest: 'Create Request',
+    createOffer: `Send Offer • ${OFFER_FEE_PI} Pi (~₺${OFFER_FEE_TL})`,
+    incomingOffers: 'Incoming Offers',
+    myOffers: 'My Sent Offers',
+    selectOffer: 'Select Offer',
+    ignoreOffer: 'Ignore',
+    selectedOffer: 'Selected Offer',
+    requestDetail: 'Request Detail',
+    completeProfile: 'Complete your profile before creating a request',
+    completeProvider: 'Register before offering services',
+    name: 'Full Name',
+    phone: 'Phone',
+    location: 'Location',
+    budget: 'Budget',
+    date: 'Date',
+    description: 'Description',
+    company: 'Company / Individual',
+    experience: 'Experience',
+    certificate: 'Certificate / Document',
+    price: 'Offer Price',
+    message: 'Message / Description',
+    save: 'Save',
+    cancel: 'Cancel',
+    dbSaved: 'Request created and saved to database',
+    offerSaved: 'Offer sent',
+    selected: 'Offer selected and job started',
+    activeJobs: 'Active Jobs',
+    completeJob: 'Complete Job',
+    jobStarted: 'Job started',
+    jobCompleted: 'Job completed',
+    reviewJob: 'Add Review',
+    reviewSaved: 'Review and rating saved',
+    providerRating: 'Provider Rating',
+    messages: 'Messages',
+    sendMessage: 'Send Message',
+    ignored: 'Offer ignored',
+    wallet: 'Wallet',
+    balance: 'Demo Balance',
+    buyerSettings: 'Settings',
+    myProfile: 'My Profile',
+    passwords: 'Passwords',
+    paymentOptions: 'Payment Options',
+    inviteFriend: 'Invite a friend',
+    rateApp: 'Rate the app',
+    supportCenter: 'Support Center',
+    dataPrivacy: 'Data and privacy',
+    complaintSuggestion: 'Complaint and suggestion',
+    logout: 'Logout',
+    version: 'Wanted.pi Varan 24.3 — Working Language Switch',
+  },
 };
 
 const IMG = {
@@ -554,6 +625,8 @@ async function supabaseUploadDocument(file: File, userKey: string) {
 
 export default function AppPage() {
   const [hydrated, setHydrated] = useState(false);
+  const [lang, setLang] = useState<Lang>('tr');
+  const t = translations[lang];
   const [role, setRole] = useState<Role>(null);
   const [page, setPage] = useState<Page>('neoHome');
   const [query, setQuery] = useState('');
@@ -595,6 +668,7 @@ useEffect(() => {
 
       if (parsedData) {
         const data = parsedData;
+        if (data.lang === 'tr' || data.lang === 'en') setLang(data.lang);
         if (data.role) setRole(data.role);
         if (data.page) setPage(data.page);
         const safe = buildSafeSnapshot(data);
@@ -620,10 +694,10 @@ useEffect(() => {
     let previous: any = {};
     try { previous = previousRaw ? JSON.parse(previousRaw) : {}; } catch {}
     const safeProfile = isProfileFilled(profile) ? profile : mergeProfileSafe(defaultProfile, previous.profile || {});
-    const snapshot = { role, page, profile: safeProfile, requests, offers, jobs, messages, documents, reviews, escrows };
+    const snapshot = { lang, role, page, profile: safeProfile, requests, offers, jobs, messages, documents, reviews, escrows };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
     localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(snapshot));
-  }, [hydrated, role, page, profile, requests, offers, jobs, messages, documents, reviews, escrows]);
+  }, [hydrated, lang, role, page, profile, requests, offers, jobs, messages, documents, reviews, escrows]);
 
   const filteredServices = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -1144,14 +1218,14 @@ useEffect(() => {
               ☰
             </button>
             <div className="flex items-center gap-2">
-              <LanguageToggle />
-              <div className="px-3 py-2 rounded-full bg-white/80 border border-white shadow-sm text-[11px] font-black text-[#12864F]">Pi + Web3</div>
+              <LanguageToggle lang={lang} setLang={setLang} />
+              <div className="px-3 py-2 rounded-full bg-white/80 border border-white shadow-sm text-[11px] font-black text-[#12864F]">{lang === 'tr' ? 'Pi + Web3' : 'Pi + Web3'}</div>
             </div>
           </div>
 
           <LandingRoleButton
             title="Hizmet Al"
-            desc="Usta, uzman veya çalışan bul. Talep oluştur, teklifleri karşılaştır."
+            desc="{lang === 'tr' ? 'Usta, uzman veya çalışan bul. Talep oluştur, teklifleri karşılaştır.' : 'Find a professional, create a request and compare offers.'}"
             icon={<Search size={28} />}
             tone="buyer"
             onClick={() => { setRole('buyer'); setPage('neoHome'); }}
@@ -1179,8 +1253,8 @@ useEffect(() => {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-14 h-14 rounded-2xl bg-[#2563EB] text-white flex items-center justify-center text-2xl font-black shadow-[0_0_22px_rgba(37,99,235,0.55)]">W</div>
                   <div>
-                    <h2 className="text-[26px] leading-tight font-black">Wanted.pi Menü</h2>
-                    <p className="text-sm text-white/70">İçindekiler ve hızlı araçlar</p>
+                    <h2 className="text-[26px] leading-tight font-black">{lang === 'tr' ? 'Wanted.pi Menü' : 'Wanted.pi Menu'}</h2>
+                    <p className="text-sm text-white/70">{lang === 'tr' ? 'İçindekiler ve hızlı araçlar' : 'Contents and quick tools'}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-3 mb-4">
@@ -1231,7 +1305,7 @@ useEffect(() => {
 
   if (role === 'provider') {
     return (
-      <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
+      <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
         {page === 'providerHome' && <ProviderHome t={t} profile={profile} providerReady={providerReady} providerVerified={providerVerified} providerRating={providerRating} documents={documents} reviews={reviews} updateProfile={updateProfile} saveProfile={saveProfile} submitDocument={submitDocument} />}
         {page === 'jobs' && <ProviderJobs t={t} requests={providerVisibleRequests} onOffer={setOfferTarget} />}
         {page === 'offers' && <ProviderOffers t={t} offers={offers} jobs={jobs} messages={messages} messageDrafts={messageDrafts} setMessageDrafts={setMessageDrafts} sendMessage={sendMessage} completeJob={completeJob} />}
@@ -1255,7 +1329,7 @@ useEffect(() => {
 
   if (role === 'admin') {
     return (
-      <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
+      <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
         <AdminHome t={t} requests={requests} offers={offers} documents={documents} reviews={reviews} setDocumentStatus={setDocumentStatus} profile={profile} setRole={setRole} />
         {toast && <Toast message={toast} />}
       </Shell>
@@ -1263,7 +1337,7 @@ useEffect(() => {
   }
 
   return (
-    <Shell t={t} role={role} setRole={setRole} setPage={setPage}>
+    <Shell t={t} role={role} setRole={setRole} setPage={setPage} lang={lang} setLang={setLang}>
       {page === 'neoHome' && (
         <BuyerNeoHome
           t={t}
@@ -1341,7 +1415,7 @@ function LandingWantedCenter() {
       <div className="mt-3 h-7 flex justify-center overflow-hidden">
         <p className="text-[17px] font-black text-[#16A34A] whitespace-nowrap overflow-hidden border-r-2 border-[#16A34A] animate-[typeOnce_2.8s_steps(28)_forwards]">Arayan bulur, çalışan kazanır.</p>
       </div>
-      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.</p>
+      <p className="mt-2 text-sm text-[#667085] max-w-xs leading-relaxed opacity-0 animate-[fadeInText_1s_ease-out_2.7s_forwards]">{lang === 'tr' ? 'Pi ekosistemi için sade, hızlı ve güven veren hizmet pazarı.' : 'A simple, fast and trusted service marketplace for the Pi ecosystem.'}</p>
       <style>{`
         @keyframes orbitSpin {
           from { transform: rotate(0deg); }
@@ -1473,19 +1547,19 @@ function PiDomainValidationHidden() {
 }
 
 
-function LanguageToggle() {
-  const [active, setActive] = useState<'tr' | 'en'>('tr');
+function LanguageToggle({ lang, setLang }: { lang: Lang; setLang: (lang: Lang) => void }) {
+  const active = lang;
   return (
     <div className="flex items-center gap-1 rounded-full bg-white/80 border border-white/80 p-1 shadow-[0_10px_28px_rgba(15,23,42,0.10)] backdrop-blur-xl">
       <button
-        onClick={() => setActive('tr')}
+        onClick={() => setLang('tr')}
         className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'tr' ? 'bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white shadow-[0_0_16px_rgba(239,68,68,0.35)]' : 'text-[#667085]'}`}
         title="Türkçe"
       >
         🇹🇷 TR
       </button>
       <button
-        onClick={() => setActive('en')}
+        onClick={() => setLang('en')}
         className={`px-2.5 py-1.5 rounded-full text-[12px] font-black transition-all ${active === 'en' ? 'bg-gradient-to-r from-[#16A34A] to-[#2563EB] text-white shadow-[0_0_16px_rgba(37,99,235,0.35)]' : 'text-[#667085]'}`}
         title="English"
       >
@@ -1495,7 +1569,7 @@ function LanguageToggle() {
   );
 }
 
-function Shell({ children, t, role, setRole, setPage }: any) {
+function Shell({ children, t, role, setRole, setPage, lang, setLang }: any) {
   return (
     <div className="h-screen bg-[radial-gradient(circle_at_top_left,#EAF8F0_0,#F7F8FA_34%,#F3F5F7_100%)] text-[#101828] overflow-hidden">
       <PiDomainValidationHidden />
@@ -1515,7 +1589,7 @@ function Shell({ children, t, role, setRole, setPage }: any) {
               </div>
             </button>
             <div className="flex items-center gap-2">
-              <LanguageToggle />
+              <LanguageToggle lang={lang} setLang={setLang} />
               <span className="text-[11px] font-bold text-[#667085] bg-white border border-[#EAECF0] px-3 py-1.5 rounded-full shadow-sm">{role === 'buyer' ? 'Hizmet Alan' : role === 'provider' ? 'Hizmet Veren' : 'Admin'}</span>
             </div>
           </div>
